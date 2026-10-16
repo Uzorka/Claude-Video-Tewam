@@ -15,7 +15,9 @@
     "demo": "tsx src/cli.ts demo",
     "check": "tsx src/cli.ts check",
     "preview": "remotion studio src/video/index.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "serve": "tsx src/cli.ts serve",
+    "connect-telegram": "tsx src/cli.ts connect-telegram"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.135.0",

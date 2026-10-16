@@ -1,7 +1,8 @@
 import { config } from "./config.js";
-import { listJobs, loadPlan, readState, writeState } from "./jobs.js";
+import { demoPlan } from "./demo.js";
+import { createJob, listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
-import { approveJob, makeVideo, retryJob, reviseJob } from "./produce.js";
+import { approveJob, makeVideo, produceAndReview, retryJob, reviseJob } from "./produce.js";
 import { esc, getUpdates, sendMessage, type TgMessage } from "./telegram.js";
 import type { Job, Topic } from "./types.js";
 
@@ -17,7 +18,8 @@ Commands:
 • <code>/topics</code> – today's best trending topics
 • <code>/make 2</code> – make topic #2 from the last /topics list
 • <code>/new your topic here</code> – make a video on any topic you choose
-• <code>/status</code> – what's in progress`;
+• <code>/status</code> – what's in progress
+• <code>/demo</code> – a short sample video to check the style and voice`;
 
 const APPROVE = /^(approve|approved|yes|publish|go|ship it|looks good|lgtm|✅|👍)[.!]*$/i;
 const REJECT = /^(reject|rejected|drop|skip|no|cancel|🗑️?|👎)[.!]*$/i;
@@ -38,11 +40,11 @@ function customTopic(text: string): Topic {
 }
 
 /** Read your Telegram replies and act on them. */
-export async function processInbox() {
+export async function processInbox({ quiet = false } = {}) {
   const state = readState("telegram", { offset: 0 });
   const updates = await getUpdates(state.offset);
   if (!updates.length) {
-    console.log("📭 No new messages.");
+    if (!quiet) console.log("📭 No new messages.");
     return;
   }
 
@@ -58,6 +60,12 @@ export async function processInbox() {
     const jobs = listJobs();
     if (/^\/(start|help)\b/i.test(text)) {
       tasks.push(() => sendMessage(HELP));
+    } else if (/^\/demo\b/i.test(text)) {
+      tasks.push(async () => {
+        await sendMessage("🎬 Making a short sample video. It takes about 5 minutes…");
+        const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Requested from Telegram", score: 0, source_urls: [] });
+        await produceAndReview(job, demoPlan);
+      });
     } else if (/^\/status\b/i.test(text)) {
       const active = jobs.filter((j) => !["published", "rejected", "approved"].includes(j.status));
       tasks.push(() =>

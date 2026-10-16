@@ -1,5 +1,7 @@
-import { config } from "./config.js";
-import { createJob, writeState } from "./jobs.js";
+import fs from "node:fs";
+import path from "node:path";
+import { ROOT, config, requireKeys } from "./config.js";
+import { createJob, readState, writeState } from "./jobs.js";
 import { demoPlan } from "./demo.js";
 import { processInbox } from "./inbox.js";
 import { scoutTopics } from "./pipeline/trends.js";
@@ -59,6 +61,86 @@ async function check() {
   }
 }
 
+/** Make a video on your topic, or on today's best trending topic. */
+async function autoMake(custom?: string) {
+  let topic: Topic;
+  if (custom) {
+    topic = { title: custom, angle: "As requested by the channel owner.", why_now: "Requested directly by the channel owner.", score: 100, source_urls: [] };
+  } else {
+    const topics = await scoutTopics(5);
+    writeState("last_topics", topics);
+    topic = topics[0];
+    await sendMessage(
+      `🔥 Today's pick: <b>${esc(topic.title)}</b>\n\nRunners-up (send <code>/make 2</code> etc. to make one):\n${topics
+        .slice(1)
+        .map((t, i) => `${i + 2}. ${esc(t.title)}`)
+        .join("\n")}`,
+    );
+  }
+  return makeVideo(topic);
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+/** Save one setting into the .env file (used when running on your own computer). */
+function saveEnv(name: string, value: string) {
+  const file = path.join(ROOT, ".env");
+  const lines = fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n").filter((l) => !l.startsWith(`${name}=`)) : [];
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  lines.push(`${name}=${value}`);
+  fs.writeFileSync(file, lines.join("\n") + "\n");
+  process.env[name] = value;
+}
+
+type TgPeek = { ok: boolean; description?: string; result?: { update_id: number; message?: { date: number; chat: { id: number; first_name?: string } } }[] };
+
+/** Find your Telegram chat ID automatically: you send the bot a message, we read it. */
+async function connectTelegram() {
+  requireKeys("TELEGRAM_BOT_TOKEN");
+  console.log("\n📱 Open your bot in Telegram and send it any message (for example: hello). Waiting…");
+  const since = Math.floor(Date.now() / 1000) - 600;
+  for (let i = 0; i < 100; i++) {
+    const res = await fetch(`https://api.telegram.org/bot${config.telegram.botToken}/getUpdates`);
+    const data = (await res.json()) as TgPeek;
+    if (!data.ok) throw new Error(`Telegram says: ${data.description}. Check TELEGRAM_BOT_TOKEN.`);
+    const hit = [...(data.result ?? [])].reverse().find((u) => u.message && u.message.date >= since);
+    if (hit?.message) {
+      const id = String(hit.message.chat.id);
+      saveEnv("TELEGRAM_CHAT_ID", id);
+      config.telegram.chatId = id;
+      writeState("telegram", { offset: hit.update_id + 1 }); // don't treat "hello" as a command later
+      await sendMessage(`👋 Hi ${esc(hit.message.chat.first_name ?? "there")}! Your studio is connected. Send /help to see what I can do.`);
+      console.log(`✅ Connected! Your chat ID ${id} is saved. Check Telegram for a hello from your bot.`);
+      return;
+    }
+    await sleep(3000);
+  }
+  throw new Error("No message arrived in 5 minutes. Send your bot a message and run this again.");
+}
+
+/** Laptop mode: keep running, answer Telegram within seconds, and (optionally) make a daily video. */
+async function serve() {
+  requireKeys("TELEGRAM_BOT_TOKEN", "TELEGRAM_CHAT_ID");
+  const dailyHour = Number(process.env.DAILY_HOUR ?? 9);
+  console.log("🎬 Your studio is running. Leave this window open (closing it stops the studio).");
+  console.log("   Talk to it from Telegram. Press Ctrl+C here to stop.\n");
+  await sendMessage("🟢 Studio is online. Send /topics to see what's trending, or /new your topic to make a video.");
+  for (;;) {
+    try {
+      await processInbox({ quiet: true });
+      const today = new Date().toLocaleDateString("en-CA");
+      if (process.env.DAILY_VIDEO === "on" && new Date().getHours() >= dailyHour && readState("daily", { last: "" }).last !== today) {
+        writeState("daily", { last: today });
+        await autoMake();
+      }
+    } catch (e) {
+      console.error(`⚠️  ${(e as Error).message}`);
+      await sleep(30_000); // e.g. internet dropped for a moment: wait, then keep going
+    }
+    await sleep(5_000);
+  }
+}
+
 async function main() {
   switch (command) {
     case "scout":
@@ -72,22 +154,7 @@ async function main() {
       break;
     }
     case "make": {
-      const custom = arg("topic");
-      let topic: Topic;
-      if (custom) {
-        topic = { title: custom, angle: "As requested by the channel owner.", why_now: "Requested directly by the channel owner.", score: 100, source_urls: [] };
-      } else {
-        const topics = await scoutTopics(5);
-        writeState("last_topics", topics);
-        topic = topics[0];
-        await sendMessage(
-          `🔥 Today's pick: <b>${esc(topic.title)}</b>\n\nRunners-up (send <code>/make 2</code> etc. to make one):\n${topics
-            .slice(1)
-            .map((t, i) => `${i + 2}. ${esc(t.title)}`)
-            .join("\n")}`,
-        );
-      }
-      const job = await makeVideo(topic);
+      const job = await autoMake(arg("topic"));
       if (job.status === "failed") process.exitCode = 1;
       break;
     }
@@ -102,8 +169,14 @@ async function main() {
     case "check":
       await check();
       break;
+    case "connect-telegram":
+      await connectTelegram();
+      break;
+    case "serve":
+      await serve();
+      break;
     default:
-      console.log("Commands: check | topics | make [--topic \"...\"] | inbox | demo");
+      console.log('Commands: check | topics | make [--topic "..."] | inbox | demo | serve | connect-telegram');
   }
 }
 
