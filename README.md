@@ -12,7 +12,7 @@ An AI production team for a tech/AI YouTube channel. Every day it finds what's t
 | Researcher | `src/pipeline/research.ts`, `src/pipeline/sources.ts` | Claude + live web search, or (free mode) Gemini reading articles the studio downloads |
 | Writer & director | `src/pipeline/script.ts` | The AI (Claude or Gemini) writes the script and plans every scene |
 | Voice | `src/pipeline/voice.ts` | ElevenLabs (your cloned voice) with word-level timing |
-| B-roll & captures | `src/pipeline/visuals.ts` | Pexels stock video, Playwright web-page captures, music |
+| B-roll & captures | `src/pipeline/visuals.ts` | Pixabay/Pexels stock video, Playwright web-page captures, music |
 | Editor | `src/video/*` | Remotion (React): kinetic titles, stats, lists, comparisons, captions, transitions, thumbnail |
 | Producer | `src/produce.ts` | Runs the steps, saves files to GitHub Releases, sends the review |
 | Review desk | `src/inbox.ts` | Reads your Telegram replies: approve / notes / commands |

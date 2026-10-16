@@ -23,7 +23,7 @@ async function check() {
     row(Boolean(config.anthropic.apiKey), "AI brain: Claude (ANTHROPIC_API_KEY)", "required: research and scripts");
   }
   row(Boolean(config.elevenlabs.apiKey && config.elevenlabs.voiceId), "Voice (ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID)", "required for real voice-over");
-  row(Boolean(config.pexels.apiKey), "Stock footage (PEXELS_API_KEY)", "strongly recommended");
+  row(Boolean(config.pixabay.apiKey || config.pexels.apiKey), "Stock footage (PIXABAY_API_KEY or PEXELS_API_KEY)", "strongly recommended");
   row(Boolean(config.telegram.botToken), "Telegram bot (TELEGRAM_BOT_TOKEN)", "required for review links");
   row(Boolean(config.telegram.chatId), "Your Telegram chat (TELEGRAM_CHAT_ID)", "see below");
   row(Boolean(config.youtube.apiKey), "YouTube trending data (YOUTUBE_API_KEY)", "optional");

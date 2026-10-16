@@ -40,6 +40,7 @@ export const config = {
     model: env("ELEVENLABS_MODEL", "eleven_multilingual_v2"),
   },
   pexels: { apiKey: env("PEXELS_API_KEY") },
+  pixabay: { apiKey: env("PIXABAY_API_KEY") },
   youtube: {
     apiKey: env("YOUTUBE_API_KEY"),
     clientId: env("YOUTUBE_CLIENT_ID"),

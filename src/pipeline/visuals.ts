@@ -6,54 +6,88 @@ import { jobMediaDir } from "../jobs.js";
 import type { Scene } from "../types.js";
 import { download, publicPath } from "./media.js";
 
-type PexelsVideo = {
-  id: number;
-  duration: number;
-  width: number;
-  height: number;
-  video_files: { link: string; width: number | null; height: number | null; file_type: string; quality: string | null }[];
-};
+/** One downloadable stock clip, whichever library it came from. */
+type Clip = { id: string; duration: number; url: string };
 
 const hash = (s: string) => crypto.createHash("sha1").update(s).digest("hex").slice(0, 12);
 
-async function pexelsSearch(query: string): Promise<PexelsVideo[]> {
+async function getJson<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
+  const res = await fetch(url, { headers, signal: AbortSignal.timeout(20_000) });
+  if (!res.ok) throw new Error(`${new URL(url).hostname} ${res.status}`);
+  return (await res.json()) as T;
+}
+
+type PexelsVideo = {
+  id: number;
+  duration: number;
+  video_files: { link: string; width: number | null; file_type: string }[];
+};
+
+async function pexelsSearch(query: string): Promise<Clip[]> {
   const url = `https://api.pexels.com/videos/search?query=${encodeURIComponent(query)}&orientation=landscape&size=medium&per_page=15`;
-  const res = await fetch(url, { headers: { Authorization: config.pexels.apiKey }, signal: AbortSignal.timeout(20_000) });
-  if (!res.ok) throw new Error(`Pexels ${res.status}`);
-  return ((await res.json()) as { videos: PexelsVideo[] }).videos;
+  const { videos } = await getJson<{ videos: PexelsVideo[] }>(url, { Authorization: config.pexels.apiKey });
+  return videos.flatMap((v) => {
+    // Closest to 1080p, never smaller than 720p.
+    const file = v.video_files
+      .filter((f) => f.file_type === "video/mp4" && (f.width ?? 0) >= 1280)
+      .sort((a, b) => Math.abs((a.width ?? 0) - 1920) - Math.abs((b.width ?? 0) - 1920))[0];
+    return file ? [{ id: `pexels-${v.id}`, duration: v.duration, url: file.link }] : [];
+  });
 }
 
-function bestFile(v: PexelsVideo) {
-  // Closest to 1080p, never smaller than 720p.
-  return v.video_files
-    .filter((f) => f.file_type === "video/mp4" && (f.width ?? 0) >= 1280)
-    .sort((a, b) => Math.abs((a.width ?? 0) - 1920) - Math.abs((b.width ?? 0) - 1920))[0];
+type PixabayVideo = {
+  id: number;
+  duration: number;
+  videos: Record<"large" | "medium" | "small", { url: string; width: number; height: number } | undefined>;
+};
+
+async function pixabaySearch(query: string): Promise<Clip[]> {
+  const url = `https://pixabay.com/api/videos/?key=${encodeURIComponent(config.pixabay.apiKey)}&q=${encodeURIComponent(query)}&per_page=15&safesearch=true`;
+  const { hits } = await getJson<{ hits: PixabayVideo[] }>(url);
+  return hits.flatMap((v) => {
+    const file = [v.videos.large, v.videos.medium].find((f) => f?.url && f.width >= 1280 && f.width > f.height);
+    return file ? [{ id: `pixabay-${v.id}`, duration: v.duration, url: file.url }] : [];
+  });
 }
 
-/** Stock b-roll per scene, never reusing the same clip twice in one video. */
+/** Stock b-roll per scene from Pexels and/or Pixabay, never reusing the same clip twice in one video. */
 export async function fetchBroll(jobId: string, scenes: Scene[], minSeconds: Record<string, number>) {
   const out: Record<string, { file: string; duration: number }> = {};
-  if (!config.pexels.apiKey) {
-    console.log("🎞️  No Pexels key: scenes will use animated backgrounds instead of stock footage.");
+  const libraries = [
+    ...(config.pexels.apiKey ? [pexelsSearch] : []),
+    ...(config.pixabay.apiKey ? [pixabaySearch] : []),
+  ];
+  if (!libraries.length) {
+    console.log("🎞️  No stock footage key (PIXABAY_API_KEY or PEXELS_API_KEY): scenes will use animated backgrounds.");
     return out;
   }
   console.log("🎞️  Finding b-roll footage…");
   const dir = path.join(jobMediaDir(jobId), "broll");
   fs.mkdirSync(dir, { recursive: true });
-  const used = new Set<number>();
-  const cache = new Map<string, PexelsVideo[]>();
+  const used = new Set<string>();
+  const cache = new Map<string, Clip[]>();
+
+  async function search(query: string) {
+    if (!cache.has(query)) {
+      const results = await Promise.allSettled(libraries.map((find) => find(query)));
+      const clips = results.flatMap((r) => (r.status === "fulfilled" ? r.value : []));
+      const failed = results.find((r) => r.status === "rejected");
+      if (!clips.length && failed) throw (failed as PromiseRejectedResult).reason;
+      cache.set(query, clips);
+    }
+    return cache.get(query)!;
+  }
 
   for (const scene of scenes) {
     const query = scene.broll_query?.trim();
     if (!query) continue;
     try {
-      if (!cache.has(query)) cache.set(query, await pexelsSearch(query));
-      const candidates = cache.get(query)!.filter((v) => !used.has(v.id) && bestFile(v));
-      const pick = candidates.find((v) => v.duration >= Math.min(minSeconds[scene.id] ?? 0, 12)) ?? candidates[0];
+      const candidates = (await search(query)).filter((c) => !used.has(c.id));
+      const pick = candidates.find((c) => c.duration >= Math.min(minSeconds[scene.id] ?? 0, 12)) ?? candidates[0];
       if (!pick) continue;
       used.add(pick.id);
-      const file = path.join(dir, `pexels-${pick.id}.mp4`);
-      if (!fs.existsSync(file)) await download(bestFile(pick)!.link, file);
+      const file = path.join(dir, `${pick.id}.mp4`);
+      if (!fs.existsSync(file)) await download(pick.url, file);
       out[scene.id] = { file: publicPath(file), duration: pick.duration };
     } catch (e) {
       console.log(`  ✗ b-roll for "${query}": ${(e as Error).message}`);

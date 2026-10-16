@@ -11,7 +11,7 @@ You can test the whole idea **without a card**. Free test mode uses free service
 |---|---|---|
 | AI brain (topics, research, scripts) | **Google Gemini** free key | **Claude**: best writing and live web research. Pay as you go, about $1–3 per video |
 | Voice-over | **ElevenLabs free plan**: realistic ready-made voices, about 10 minutes of speech a month | **ElevenLabs Creator** (about $22/month): **your own cloned voice** |
-| Stock footage | Pexels (free) | Pexels (free) |
+| Stock footage | Pixabay (free) | Pixabay (free) |
 | Review on your phone | Telegram (free) | Telegram (free) |
 | Running everything | GitHub Actions (free) | GitHub Actions (free) |
 
@@ -74,12 +74,15 @@ No card is needed. Don't turn on billing for this test.
 
 ---
 
-## Step 5: Get a free Pexels key for stock footage (3 min)
+## Step 5: Get a free Pixabay key for stock footage (3 min)
 
-1. Go to **https://www.pexels.com/api/** and click **Get Started** (create a free account).
-2. Fill in the short form (Project: "YouTube channel video production").
-3. Copy your API key.
-   **📋 Save this as `PEXELS_API_KEY`.**
+1. Go to **https://pixabay.com** and click **Join** (free account). Confirm your email.
+2. While logged in, open **https://pixabay.com/api/docs/**.
+3. Scroll to the **Parameters** section. Your key is shown in green next to `key (required)`.
+   **📋 Save this as `PIXABAY_API_KEY`.**
+
+> Pexels has paused new API keys. If you already have a Pexels key, you can add it too as `PEXELS_API_KEY`, and the studio will search both libraries.
+> No key at all? The studio still works and uses animated backgrounds instead of footage.
 
 ---
 
@@ -107,7 +110,7 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
    | `GEMINI_API_KEY` | from Step 3 |
    | `ELEVENLABS_API_KEY` | from Step 4 |
    | `ELEVENLABS_VOICE_ID` | from Step 4 |
-   | `PEXELS_API_KEY` | from Step 5 |
+   | `PIXABAY_API_KEY` | from Step 5 |
    | `TELEGRAM_BOT_TOKEN` | from Step 2 |
 
 4. Now click the **Variables** tab → **New repository variable** and add:
