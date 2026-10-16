@@ -223,6 +223,22 @@ When you reply `approve`, the bot sends: the thumbnail, a full-quality download 
 
 ---
 
+## 📷 Real product photos and your own footage
+
+The studio adds real visuals in two ways:
+
+1. **Automatically:** for scenes about a specific product, it uses freely licensed photos from **Wikimedia Commons**, then the main image of the news articles it researched. Photographers and sites are credited in the video and in the description. Article images belong to their publishers, so check them before you publish.
+2. **Your own shots (best for growing a real channel):** in Telegram, send the bot photos or short videos (under 20 MB) with a **caption** saying what they show, for example:
+   - `iphone 18, unboxing`
+   - `galaxy s26 camera`
+   - `my desk setup`
+
+   They're saved on your laptop. Whenever a video mentions those words, your shots are used first: clips as background footage, photos as product shots. Vertical phone videos get a blurred background so nothing is cropped. Send `/library` to see what you've saved.
+
+Tip: film short 5–15 second clips of products from different angles (in hand, on the desk, close-ups of the camera or screen). A few of these make a video look like MKBHD's instead of a slideshow.
+
+---
+
 ## Optional extras
 
 ### Background music

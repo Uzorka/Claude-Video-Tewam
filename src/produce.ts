@@ -7,11 +7,11 @@ import { fmtTime } from "./pipeline/media.js";
 import { makePreview, renderVideo } from "./pipeline/render.js";
 import { researchTopic } from "./pipeline/research.js";
 import { reviseScript, writeScript } from "./pipeline/script.js";
-import { captureScreenshots, fetchBroll, pickMusic } from "./pipeline/visuals.js";
+import { captureScreenshots, fetchBroll, fetchRealVisuals, pickMusic } from "./pipeline/visuals.js";
 import { voiceScenes } from "./pipeline/voice.js";
 import { publish } from "./publish.js";
 import { esc, sendMessage, sendVideo } from "./telegram.js";
-import type { Job, RenderProps, RenderScene, Topic, VideoPlan } from "./types.js";
+import type { FoundImage, Job, RenderProps, RenderScene, Topic, VideoPlan } from "./types.js";
 
 const PAD = 0.3; // breathing room after each line, in seconds
 const tagFor = (job: Job) => `video-${job.id}-v${job.version}`;
@@ -30,19 +30,33 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
 
   const voice = await voiceScenes(job.id, plan.scenes);
   const durations = Object.fromEntries(plan.scenes.map((s) => [s.id, voice[s.id].duration + PAD]));
-  const broll = await fetchBroll(job.id, plan.scenes, durations);
+  const imagesFile = path.join(jobDir(job.id), "images.json");
+  const articleImages: FoundImage[] = fs.existsSync(imagesFile) ? JSON.parse(fs.readFileSync(imagesFile, "utf8")) : [];
+  const real = await fetchRealVisuals(job.id, plan.scenes, articleImages);
+  // Your own clips win; stock footage fills the remaining scenes.
+  const stock = await fetchBroll(job.id, plan.scenes.filter((s) => !real.videos[s.id]), durations);
+  const broll = { ...stock, ...real.videos };
   const shots = await captureScreenshots(job.id, plan.scenes);
+  saveText(job.id, "credits.txt", real.credits.join("\n"));
 
-  const scenes: RenderScene[] = plan.scenes.map((s) => ({
-    ...s,
-    kind: s.kind === "screenshot" && !shots[s.id] ? "title" : s.kind,
-    audio: voice[s.id].file,
-    duration: Math.max(2.5, durations[s.id]),
-    words: voice[s.id].words,
-    broll: broll[s.id]?.file ?? null,
-    brollDuration: broll[s.id]?.duration ?? null,
-    image: shots[s.id] ?? null,
-  }));
+  const scenes: RenderScene[] = plan.scenes.map((s) => {
+    let kind = s.kind;
+    if (kind === "screenshot" && !shots[s.id]) kind = "title";
+    if (kind === "product" && !real.photos[s.id]) kind = "title";
+    return {
+      ...s,
+      kind,
+      heading: s.heading ?? (kind === "title" ? s.product : null),
+      audio: voice[s.id].file,
+      duration: Math.max(2.5, durations[s.id]),
+      words: voice[s.id].words,
+      broll: broll[s.id]?.file ?? null,
+      brollDuration: broll[s.id]?.duration ?? null,
+      image: shots[s.id] ?? null,
+      photo: real.photos[s.id]?.file ?? null,
+      photoCredit: real.photos[s.id]?.credit ?? null,
+    };
+  });
   const props: RenderProps = {
     channelName: config.channel.name,
     title: plan.title,
@@ -105,8 +119,9 @@ ${videoUrl ? `▶️ Full quality: ${videoUrl}\n\n` : ""}<b>Reply to this messag
 }
 
 async function researchScriptProduce(job: Job) {
-  const brief = await researchTopic(job.topic);
+  const { brief, images } = await researchTopic(job.topic);
   saveText(job.id, "research.md", brief);
+  saveText(job.id, "images.json", JSON.stringify(images, null, 2));
   job.status = "scripting";
   saveJob(job);
   const plan = await writeScript(job.topic.title, brief);

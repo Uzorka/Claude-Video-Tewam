@@ -10,7 +10,7 @@ export const TopicSchema = z.object({
 export const TopicListSchema = z.object({ topics: z.array(TopicSchema) });
 export type Topic = z.infer<typeof TopicSchema>;
 
-export const VISUAL_KINDS = ["broll", "title", "stat", "list", "compare", "quote", "screenshot"] as const;
+export const VISUAL_KINDS = ["broll", "product", "title", "stat", "list", "compare", "quote", "screenshot"] as const;
 
 export const SceneSchema = z.object({
   id: z.string().describe("Short slug, unique within the video, e.g. 'hook' or 'price'"),
@@ -18,7 +18,7 @@ export const SceneSchema = z.object({
     .string()
     .describe("Exactly what the voice says in this scene. Spoken English, 1-4 sentences."),
   kind: z.enum(VISUAL_KINDS).describe(
-    "broll = full-screen stock video; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = scrolling capture of a public web page",
+    "broll = full-screen stock video; product = a real photo of the product with its name on screen; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = scrolling capture of a public web page",
   ),
   broll_query: z
     .string()
@@ -43,6 +43,10 @@ export const SceneSchema = z.object({
     .nullable()
     .describe("For kind=compare: right column"),
   url: z.string().nullable().describe("For kind=screenshot: a public https URL to capture"),
+  product: z
+    .string()
+    .nullable()
+    .describe("The exact product this scene is about, e.g. 'iPhone 18 Pro' or 'Galaxy S26 Ultra'. Required for kind=product; also set it on other scenes about one specific product."),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 
@@ -66,6 +70,8 @@ export type RenderScene = Scene & {
   broll: string | null; // video path relative to public/
   brollDuration: number | null; // seconds of footage available
   image: string | null; // screenshot path relative to public/
+  photo: string | null; // real product photo path relative to public/
+  photoCredit: string | null;
 };
 
 export type RenderProps = {
@@ -86,6 +92,9 @@ export type JobStatus =
   | "published"
   | "rejected"
   | "failed";
+
+/** A real image found for the topic (article hero images, Wikimedia Commons). */
+export type FoundImage = { url: string; source: string; credit: string };
 
 export type Job = {
   id: string;

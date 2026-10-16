@@ -18,7 +18,8 @@ You write scripts that keep people watching:
 - End with a clear verdict and a short, natural call to subscribe (one sentence, no begging).
 
 You also direct the visuals, scene by scene:
-- Mix scene kinds. Roughly half should be "broll" (real stock footage), the rest title/stat/list/compare/quote/screenshot. Never use the same kind more than twice in a row.
+- Mix scene kinds. Roughly 40% "broll" (real footage), 2-4 "product" scenes (a real photo of the product, set "product" to its exact name), the rest title/stat/list/compare/quote/screenshot. Never use the same kind more than twice in a row.
+- Set "product" on every scene that is about one specific device or product, so real photos and the owner's own footage of it can be used.
 - Every scene gets a broll_query (concrete, filmable stock-footage search like "person using smartphone", "server room", "circuit board macro") - it's used as the background.
 - On-screen text must be short. Headings max 6 words.
 - Only use kind "screenshot" with a public https URL listed in the brief.

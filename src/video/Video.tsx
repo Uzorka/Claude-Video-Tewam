@@ -1,7 +1,7 @@
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderProps, RenderScene } from "../types";
 import { fadeIn } from "./anim";
-import { Backdrop, Footage, PageScroll } from "./Background";
+import { Backdrop, Footage, PageScroll, ProductShot } from "./Background";
 import { Captions } from "./Captions";
 import { CompareCard, ListCard, LowerThird, QuoteCard, StatCard, TitleCard } from "./scenes/Cards";
 import { FPS, theme } from "./theme";
@@ -33,17 +33,26 @@ const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: num
       foreground = scene.image ? <PageScroll src={scene.image} durationInFrames={durationInFrames} /> : <TitleCard scene={scene} />;
       break;
     case "broll":
-      foreground = isBroll ? <LowerThird scene={scene} /> : <TitleCard scene={scene} />;
+      foreground = isBroll || scene.photo ? <LowerThird scene={scene} /> : <TitleCard scene={scene} />;
+      break;
+    case "product":
+      foreground = <LowerThird scene={{ ...scene, heading: scene.heading ?? scene.product }} />;
       break;
   }
 
+  // Real product photo: hero shot for "product" scenes, full-screen for b-roll without footage.
+  const background =
+    scene.photo && (scene.kind === "product" || (scene.kind === "broll" && !scene.broll)) ? (
+      <ProductShot scene={scene} durationInFrames={durationInFrames} fullBleed={scene.kind === "broll"} />
+    ) : scene.broll ? (
+      <Footage scene={scene} durationInFrames={durationInFrames} dim={isBroll ? 0.25 : 0.88} blur={isBroll ? 0 : 8} />
+    ) : (
+      <Backdrop seed={index} />
+    );
+
   return (
     <AbsoluteFill style={{ transform: `scale(${enter})`, opacity: fadeIn(frame, 0, 4) }}>
-      {scene.broll ? (
-        <Footage scene={scene} durationInFrames={durationInFrames} dim={isBroll ? 0.25 : 0.88} blur={isBroll ? 0 : 8} />
-      ) : (
-        <Backdrop seed={index} />
-      )}
+      {background}
       {foreground}
       {scene.audio && <Audio src={staticFile(scene.audio)} />}
     </AbsoluteFill>

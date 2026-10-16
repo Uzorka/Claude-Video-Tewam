@@ -1,4 +1,6 @@
 import fs from "node:fs";
+import path from "node:path";
+import { jobDir, loadText } from "./jobs.js";
 import { google } from "googleapis";
 import { config, requireKeys } from "./config.js";
 import type { Job, VideoPlan } from "./types.js";
@@ -47,6 +49,9 @@ export async function publish(job: Job, plan: VideoPlan, videoFile: string, thum
   // e.g. the credit line ElevenLabs' free plan requires.
   const footer = (process.env.DESCRIPTION_FOOTER ?? "").trim();
   if (footer) plan = { ...plan, description: `${plan.description}\n\n${footer}` };
+  // Credit the photographers/sites whose product photos appear in the video.
+  const credits = fs.existsSync(path.join(jobDir(job.id), "credits.txt")) ? loadText(job.id, "credits.txt").trim() : "";
+  if (credits) plan = { ...plan, description: `${plan.description}\n\nImages:\n${credits}` };
   if (config.youtube.publishMode === "api") {
     const id = await uploadToYouTube(plan, videoFile, thumbFile);
     job.youtubeId = id;

@@ -1,9 +1,12 @@
+import os from "node:os";
+import path from "node:path";
 import { config, saveEnv } from "./config.js";
+import { addToLibrary, loadLibrary, parseTags } from "./library.js";
 import { demoPlan } from "./demo.js";
 import { createJob, listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
 import { approveJob, makeVideo, produceAndReview, retryJob, reviseJob } from "./produce.js";
-import { esc, getUpdates, sendMessage, type TgMessage } from "./telegram.js";
+import { downloadTelegramFile, esc, getUpdates, sendMessage, type TgMessage } from "./telegram.js";
 import type { Job, Topic } from "./types.js";
 
 const HELP = `🤖 <b>How to talk to your studio</b>
@@ -20,7 +23,10 @@ Commands:
 • <code>/new your topic here</code> – make a video on any topic you choose
 • <code>/status</code> – what's in progress
 • <code>/demo</code> – a short sample video to check the style and voice
-• <code>/voices</code> – list voices, then <code>/voice ID</code> to switch`;
+• <code>/voices</code> – list voices, then <code>/voice ID</code> to switch
+• <code>/library</code> – your own photos and clips
+
+📷 <b>Your own footage:</b> send me photos or short videos with a caption saying what they show, e.g. <i>iphone 18, unboxing</i>. Whenever a video talks about that, I'll use your shots first.`;
 
 const APPROVE = /^(approve|approved|yes|publish|go|ship it|looks good|lgtm|✅|👍)[.!]*$/i;
 const REJECT = /^(reject|rejected|drop|skip|no|cancel|🗑️?|👎)[.!]*$/i;
@@ -60,6 +66,28 @@ export async function processInbox({ quiet = false } = {}) {
     state.offset = u.update_id + 1;
     const msg = u.message;
     if (!msg || String(msg.chat.id) !== config.telegram.chatId) continue; // ignore strangers
+    // Photos and clips you send become part of your footage library.
+    const media = msg.photo?.length
+      ? { id: msg.photo[msg.photo.length - 1].file_id, kind: "photo" as const, size: msg.photo[msg.photo.length - 1].file_size ?? 0 }
+      : msg.video
+        ? { id: msg.video.file_id, kind: "video" as const, size: msg.video.file_size ?? 0 }
+        : msg.document && /^(image|video)\//.test(msg.document.mime_type ?? "")
+          ? { id: msg.document.file_id, kind: msg.document.mime_type!.startsWith("image") ? ("photo" as const) : ("video" as const), size: msg.document.file_size ?? 0 }
+          : null;
+    if (media) {
+      const tags = parseTags(msg.caption ?? "");
+      tasks.push(async () => {
+        if (!tags.length) return void (await sendMessage("📷 Please send it again with a caption saying what it shows, e.g. <i>iphone 18, unboxing</i>.", msg.message_id));
+        if (media.size > 20 * 1024 * 1024)
+          return void (await sendMessage("That file is over 20 MB, the limit for bots. Send it as a normal video (not as a file) so Telegram compresses it, or trim it shorter.", msg.message_id));
+        const tmp = path.join(os.tmpdir(), `tg-${media.id.slice(-12)}`);
+        await downloadTelegramFile(media.id, tmp);
+        const item = await addToLibrary(tmp, media.kind, tags);
+        await sendMessage(`✅ Saved to your library as <b>${esc(tags.join(", "))}</b> (${item.type}${item.duration ? `, ${Math.round(item.duration)}s` : ""}). I'll use it when a video mentions that.`, msg.message_id);
+      });
+      continue;
+    }
+
     const text = (msg.text ?? msg.caption ?? "").trim();
     if (!text) continue;
     console.log(`📨 "${text.slice(0, 80)}"`);
@@ -72,6 +100,18 @@ export async function processInbox({ quiet = false } = {}) {
         await sendMessage("🎬 Making a short sample video. It takes about 5 minutes…");
         const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Requested from Telegram", score: 0, source_urls: [] });
         await produceAndReview(job, demoPlan);
+      });
+    } else if (/^\/library\b/i.test(text)) {
+      tasks.push(async () => {
+        const items = loadLibrary();
+        if (!items.length) return void (await sendMessage("Your library is empty. Send me photos or short videos with a caption like <i>iphone 18</i>."));
+        const byTag = new Map<string, number>();
+        for (const i of items) for (const t of i.tags) byTag.set(t, (byTag.get(t) ?? 0) + 1);
+        await sendMessage(
+          `📚 <b>Your library</b>: ${items.filter((i) => i.type === "photo").length} photos, ${items.filter((i) => i.type === "video").length} clips\n\n${[...byTag]
+            .map(([t, n]) => `• ${esc(t)} (${n})`)
+            .join("\n")}`,
+        );
       });
     } else if (/^\/voices\b/i.test(text)) {
       tasks.push(async () => {

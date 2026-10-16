@@ -85,3 +85,38 @@ export const PageScroll: React.FC<{ src: string; durationInFrames: number }> = (
     </div>
   );
 };
+
+/** Real product photo: sharp on a blurred copy of itself, slow push-in, name and credit. */
+export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed }) => {
+  const frame = useCurrentFrame();
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.08]);
+  const rise = interpolate(frame, [0, 14], [40, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
+  const src = staticFile(scene.photo!);
+  return (
+    <AbsoluteFill style={{ backgroundColor: theme.bg, overflow: "hidden" }}>
+      <Img src={src} style={{ position: "absolute", inset: -60, width: "calc(100% + 120px)", height: "calc(100% + 120px)", objectFit: "cover", filter: fullBleed ? undefined : "blur(40px) brightness(0.45)", transform: `scale(${fullBleed ? zoom : 1.1})` }} />
+      {fullBleed ? (
+        <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(7,8,12,0.35) 0%, rgba(7,8,12,0) 40%, rgba(7,8,12,0.8) 100%)" }} />
+      ) : (
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "250px 160px 190px" }}>
+          <Img
+            src={src}
+            style={{
+              maxWidth: "100%",
+              maxHeight: "100%",
+              objectFit: "contain",
+              borderRadius: 24,
+              boxShadow: "0 50px 140px rgba(0,0,0,0.65)",
+              transform: `translateY(${rise}px) scale(${zoom})`,
+            }}
+          />
+        </AbsoluteFill>
+      )}
+      {scene.photoCredit && (
+        <div style={{ position: "absolute", right: 40, bottom: 24, fontFamily: theme.font, fontSize: 18, color: "rgba(255,255,255,0.6)" }}>
+          📷 {scene.photoCredit}
+        </div>
+      )}
+    </AbsoluteFill>
+  );
+};

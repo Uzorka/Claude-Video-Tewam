@@ -5,19 +5,22 @@ import { theme } from "./theme";
 
 /** Bold, high-contrast thumbnail: footage on the right, big words on the left. */
 export const Thumbnail: React.FC<RenderProps> = ({ scenes, thumbnailText, channelName }) => {
-  const visual = scenes.find((s) => s.broll) ?? null;
+  const photo = scenes.find((s) => s.photo) ?? null;
+  const visual = photo ? null : (scenes.find((s) => s.broll) ?? null);
   const shot = scenes.find((s) => s.image) ?? null;
   const words = thumbnailText.toUpperCase().split(" ");
   return (
     <AbsoluteFill style={{ backgroundColor: theme.bg, fontFamily: theme.font }}>
-      {visual ? (
+      {photo ? (
+        <Img src={staticFile(photo.photo!)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+      ) : visual ? (
         <OffthreadVideo src={staticFile(visual.broll!)} muted style={{ width: "100%", height: "100%", objectFit: "cover" }} />
       ) : shot ? (
         <Img src={staticFile(shot.image!)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "top" }} />
       ) : (
         <Backdrop seed={3} />
       )}
-      {(visual || shot) && (
+      {(photo || visual || shot) && (
         <AbsoluteFill style={{ background: "linear-gradient(90deg, rgba(7,8,12,0.94) 0%, rgba(7,8,12,0.78) 38%, rgba(7,8,12,0.1) 78%)" }} />
       )}
       <AbsoluteFill style={{ justifyContent: "center", paddingLeft: 64, width: "64%" }}>
