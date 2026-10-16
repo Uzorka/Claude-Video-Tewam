@@ -20,7 +20,11 @@ An AI production team for a tech/AI YouTube channel. Every day it finds what's t
 
 The schedule lives in `.github/workflows/studio.yml`. Job records (research, scripts, timelines) are saved in `jobs/`; rendered videos are attached to GitHub Releases.
 
-## Run it on a computer (optional)
+## Run it on a computer
+
+Ubuntu one-liner (installs everything, asks for your keys): see **SETUP.md → Run it on your Ubuntu laptop**. Then `npm run serve` keeps the studio running and answering Telegram.
+
+Manual setup:
 
 ```bash
 npm install

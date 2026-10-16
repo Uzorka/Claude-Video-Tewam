@@ -62,7 +62,7 @@ export async function publish(job: Job, plan: VideoPlan, videoFile: string, thum
     `✅ <b>Approved: ready to upload</b>
 
 1. Download the full-quality video:
-${videoUrl ?? "(saved on the machine that rendered it)"}
+${videoUrl ?? `On your computer: ${videoFile}`}
 2. Open https://studio.youtube.com → <b>Create</b> → <b>Upload videos</b>.
 3. Copy the title, description and tags from the next messages.
 4. Thumbnail: save the image above${thumbUrl ? ` (or ${thumbUrl})` : ""} and upload it.

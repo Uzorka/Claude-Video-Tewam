@@ -3,6 +3,32 @@
 Follow these steps **in order**. Each step says exactly where to click and what to copy.
 Whenever you see **📋 Save this**, paste the value into a private note on your phone. You will need it in Step 7.
 
+## 💻 Run it on your Ubuntu laptop (no GitHub Actions needed)
+
+Use this if GitHub Actions isn't available on your account, or you simply prefer your own computer.
+
+**One-time setup (about 10 minutes):**
+1. Open **Terminal** (press `Ctrl` + `Alt` + `T`).
+2. Copy this line, paste it into Terminal (`Ctrl` + `Shift` + `V`) and press **Enter**:
+   ```
+   bash <(curl -fsSL https://raw.githubusercontent.com/Uzorka/Claude-Video-Tewam/main/scripts/setup-ubuntu.sh)
+   ```
+3. Type your computer password if asked (nothing shows while you type; that's normal) and press **Enter**.
+4. When it asks, paste each key (Gemini, ElevenLabs key and voice ID, Telegram bot token) and press **Enter**. For questions with a suggested answer in `[brackets]`, just press **Enter** to accept it.
+5. When it says *"Open your bot in Telegram and send it any message"*, send your bot `hello`. It replies, and the setup finishes with a ✅ list.
+
+**Every time you want to use the studio:**
+1. Open **Terminal** and run:
+   ```
+   cd ~/Claude-Video-Tewam && npm run serve
+   ```
+2. Leave that window open, and keep the laptop plugged in and awake. Closing the window stops the studio.
+3. Talk to it from Telegram: `/demo` for a sample video, `/topics`, `/make 1`, `/new your topic`, then reply `approve` or your notes.
+
+**Updating to the newest version later:** run the same setup line from step 2 again. It keeps your keys.
+
+---
+
 ## Start free, upgrade later
 
 You can test the whole idea **without a card**. Free test mode uses free services everywhere:
