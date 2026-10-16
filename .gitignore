@@ -1,0 +1,6 @@
+node_modules
+out
+public/jobs
+.env
+# Rendered media and downloaded assets are stored as GitHub Release files, not in git.
+jobs/*/media

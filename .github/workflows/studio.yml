@@ -1,0 +1,118 @@
+name: 🎬 Media Studio
+
+# The studio runs itself:
+#  - every day it can pick a trending topic and make a video for your review
+#    (switch on with the repository variable DAILY_VIDEO = on)
+#  - every 10 minutes it reads your Telegram replies (approve / notes / commands)
+# You can also start any step by hand: Actions tab → 🎬 Media Studio → Run workflow.
+
+on:
+  schedule:
+    - cron: "17 6 * * *" # daily video (06:17 UTC), only when the DAILY_VIDEO variable is "on"
+    - cron: "*/10 * * * *" # check Telegram for your replies
+  workflow_dispatch:
+    inputs:
+      action:
+        description: What should the studio do?
+        type: choice
+        default: check
+        options:
+          - check # test your keys and connections
+          - demo # render a sample video and send it to Telegram
+          - make # research + produce a video now
+          - topics # send today's trending topics to Telegram
+          - inbox # read Telegram replies now
+      topic:
+        description: (Optional, for "make") Your own topic instead of the trending pick
+        required: false
+
+# One run at a time so jobs never step on each other.
+concurrency:
+  group: media-studio
+  cancel-in-progress: false
+
+permissions:
+  contents: write # save job state and upload videos to Releases
+
+jobs:
+  studio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+      ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
+      PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
+      PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+      YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
+      YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
+      YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+      AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+      DESCRIPTION_FOOTER: ${{ vars.DESCRIPTION_FOOTER }}
+      CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
+      CHANNEL_NICHE: ${{ vars.CHANNEL_NICHE }}
+      CHANNEL_STYLE: ${{ vars.CHANNEL_STYLE }}
+      TARGET_MINUTES: ${{ vars.TARGET_MINUTES }}
+      PUBLISH_MODE: ${{ vars.PUBLISH_MODE }}
+      PUBLISH_PRIVACY: ${{ vars.PUBLISH_PRIVACY }}
+      DISCLOSE_SYNTHETIC: ${{ vars.DISCLOSE_SYNTHETIC }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ACTION: ${{ github.event_name == 'workflow_dispatch' && inputs.action || (github.event.schedule == '17 6 * * *' && 'make' || 'inbox') }}
+      TOPIC: ${{ inputs.topic }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get the latest studio state
+        run: git pull -q --ff-only origin "${{ github.ref_name }}"
+
+      # The inbox runs every 10 minutes; skip the heavy setup unless you've actually sent something.
+      - name: Any new Telegram messages?
+        id: gate
+        run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$ACTION" = "make" ] && [ "${{ vars.DAILY_VIDEO }}" != "on" ]; then
+            echo "Daily video is switched off (set the DAILY_VIDEO variable to 'on' to enable it)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
+          if [ "$ACTION" != "inbox" ]; then exit 0; fi
+          if [ -z "$TELEGRAM_BOT_TOKEN" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          OFFSET=$(node -e 'try{console.log(require("./state/telegram.json").offset)}catch{console.log(0)}')
+          COUNT=$(curl -s "https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/getUpdates?offset=${OFFSET}&timeout=0" | node -e 'let d="";process.stdin.on("data",c=>d+=c).on("end",()=>{try{console.log(JSON.parse(d).result.length)}catch{console.log(1)}})')
+          echo "New messages: $COUNT"
+          if [ "$COUNT" = "0" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; fi
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.skip != 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install studio
+        if: steps.gate.outputs.skip != 'true'
+        run: npm ci --no-audit --no-fund
+
+      - name: Install video tools
+        if: steps.gate.outputs.skip != 'true' && env.ACTION != 'check' && env.ACTION != 'topics'
+        run: |
+          sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
+          npx playwright-core install --with-deps chromium > /dev/null
+          npx remotion browser ensure
+
+      - name: Run "${{ env.ACTION }}"
+        if: steps.gate.outputs.skip != 'true'
+        run: npx tsx src/cli.ts "$ACTION"
+
+      - name: Save studio state
+        if: always() && steps.gate.outputs.skip != 'true'
+        run: |
+          git config user.name "media-studio[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add jobs state
+          if git diff --cached --quiet; then echo "Nothing to save."; exit 0; fi
+          git commit -q -m "studio: ${ACTION} $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git pull -q --rebase && git push -q && exit 0; sleep 5; done
+          exit 1
