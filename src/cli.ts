@@ -17,7 +17,11 @@ async function check() {
   const row = (ok: boolean, label: string, hint: string) => console.log(`${ok ? "✅" : "❌"} ${label}${ok ? "" : `  ← ${hint}`}`);
   console.log("Checking your studio setup…\n");
 
-  row(Boolean(config.anthropic.apiKey), "Claude (ANTHROPIC_API_KEY)", "required: research and scripts");
+  if (config.aiProvider === "gemini") {
+    row(Boolean(config.gemini.apiKey), "AI brain: Gemini, free mode (GEMINI_API_KEY)", "required: research and scripts");
+  } else {
+    row(Boolean(config.anthropic.apiKey), "AI brain: Claude (ANTHROPIC_API_KEY)", "required: research and scripts");
+  }
   row(Boolean(config.elevenlabs.apiKey && config.elevenlabs.voiceId), "Voice (ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID)", "required for real voice-over");
   row(Boolean(config.pexels.apiKey), "Stock footage (PEXELS_API_KEY)", "strongly recommended");
   row(Boolean(config.telegram.botToken), "Telegram bot (TELEGRAM_BOT_TOKEN)", "required for review links");
@@ -34,6 +38,12 @@ async function check() {
         ? `\n👉 Your TELEGRAM_CHAT_ID is: ${[...chats.entries()].map(([id, name]) => `${id} (${name ?? "?"})`).join(", ")}`
         : "\n👉 Send any message to your bot in Telegram, then run this check again to see your chat ID.",
     );
+  }
+  if (config.aiProvider === "gemini" && config.gemini.apiKey) {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${config.gemini.model}`, {
+      headers: { "x-goog-api-key": config.gemini.apiKey },
+    });
+    console.log(res.ok ? `\n🧠 Gemini key works (model: ${config.gemini.model}).` : `\n❌ Gemini rejected the key or model (${res.status}): ${(await res.text()).slice(0, 200)}`);
   }
   if (config.elevenlabs.apiKey) {
     const res = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": config.elevenlabs.apiKey } });

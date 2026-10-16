@@ -24,9 +24,15 @@ export const config = {
     ),
     targetMinutes: Number(env("TARGET_MINUTES", "8")),
   },
+  /** Which AI writes everything: "anthropic" (Claude, paid, best) or "gemini" (Google, has a free tier). */
+  aiProvider: (env("AI_PROVIDER") || (env("ANTHROPIC_API_KEY") ? "anthropic" : "gemini")) as "anthropic" | "gemini",
   anthropic: {
     apiKey: env("ANTHROPIC_API_KEY"),
     model: env("CLAUDE_MODEL", "claude-opus-5-5"),
+  },
+  gemini: {
+    apiKey: env("GEMINI_API_KEY"),
+    model: env("GEMINI_MODEL", "gemini-flash-latest"),
   },
   elevenlabs: {
     apiKey: env("ELEVENLABS_API_KEY"),

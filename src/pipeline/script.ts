@@ -1,5 +1,5 @@
 import { config } from "../config.js";
-import { structured } from "../claude.js";
+import { structured } from "../ai.js";
 import { VideoPlanSchema, type VideoPlan } from "../types.js";
 
 const WORDS_PER_MINUTE = 155;

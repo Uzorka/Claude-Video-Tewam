@@ -1,5 +1,5 @@
 import { config } from "../config.js";
-import { structured } from "../claude.js";
+import { structured } from "../ai.js";
 import { listJobs } from "../jobs.js";
 import { TopicListSchema, type Topic } from "../types.js";
 

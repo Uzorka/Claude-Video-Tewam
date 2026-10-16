@@ -44,6 +44,9 @@ async function uploadToYouTube(plan: VideoPlan, videoFile: string, thumbFile: st
 }
 
 export async function publish(job: Job, plan: VideoPlan, videoFile: string, thumbFile: string, videoUrl: string | null, thumbUrl: string | null) {
+  // e.g. the credit line ElevenLabs' free plan requires.
+  const footer = (process.env.DESCRIPTION_FOOTER ?? "").trim();
+  if (footer) plan = { ...plan, description: `${plan.description}\n\n${footer}` };
   if (config.youtube.publishMode === "api") {
     const id = await uploadToYouTube(plan, videoFile, thumbFile);
     job.youtubeId = id;

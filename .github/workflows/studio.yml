@@ -1,13 +1,14 @@
 name: 🎬 Media Studio
 
 # The studio runs itself:
-#  - every day it picks a trending topic and makes a video for your review
+#  - every day it can pick a trending topic and make a video for your review
+#    (switch on with the repository variable DAILY_VIDEO = on)
 #  - every 10 minutes it reads your Telegram replies (approve / notes / commands)
 # You can also start any step by hand: Actions tab → 🎬 Media Studio → Run workflow.
 
 on:
   schedule:
-    - cron: "17 6 * * *" # daily video (06:17 UTC)
+    - cron: "17 6 * * *" # daily video (06:17 UTC), only when the DAILY_VIDEO variable is "on"
     - cron: "*/10 * * * *" # check Telegram for your replies
   workflow_dispatch:
     inputs:
@@ -39,6 +40,7 @@ jobs:
     timeout-minutes: 180
     env:
       ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
       ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
       ELEVENLABS_VOICE_ID: ${{ secrets.ELEVENLABS_VOICE_ID }}
       PEXELS_API_KEY: ${{ secrets.PEXELS_API_KEY }}
@@ -48,6 +50,9 @@ jobs:
       YOUTUBE_CLIENT_ID: ${{ secrets.YOUTUBE_CLIENT_ID }}
       YOUTUBE_CLIENT_SECRET: ${{ secrets.YOUTUBE_CLIENT_SECRET }}
       YOUTUBE_REFRESH_TOKEN: ${{ secrets.YOUTUBE_REFRESH_TOKEN }}
+      AI_PROVIDER: ${{ vars.AI_PROVIDER }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
+      DESCRIPTION_FOOTER: ${{ vars.DESCRIPTION_FOOTER }}
       CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
       CHANNEL_NICHE: ${{ vars.CHANNEL_NICHE }}
       CHANNEL_STYLE: ${{ vars.CHANNEL_STYLE }}
@@ -68,6 +73,10 @@ jobs:
       - name: Any new Telegram messages?
         id: gate
         run: |
+          if [ "${{ github.event_name }}" = "schedule" ] && [ "$ACTION" = "make" ] && [ "${{ vars.DAILY_VIDEO }}" != "on" ]; then
+            echo "Daily video is switched off (set the DAILY_VIDEO variable to 'on' to enable it)."
+            echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+          fi
           if [ "$ACTION" != "inbox" ]; then exit 0; fi
           if [ -z "$TELEGRAM_BOT_TOKEN" ]; then echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0; fi
           OFFSET=$(node -e 'try{console.log(require("./state/telegram.json").offset)}catch{console.log(0)}')

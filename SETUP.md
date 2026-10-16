@@ -1,31 +1,36 @@
-# 🎬 Media Studio: Step-by-Step Setup (beginner friendly)
+# 🎬 Claude Video Team: Step-by-Step Setup (beginner friendly)
 
 Follow these steps **in order**. Each step says exactly where to click and what to copy.
 Whenever you see **📋 Save this**, paste the value into a private note on your phone. You will need it in Step 7.
 
-> ⏱️ Total time: about 1–2 hours (most of it is recording your voice samples).
-> 💳 You need a debit/credit card for the paid services (Claude and ElevenLabs).
+## Start free, upgrade later
 
----
+You can test the whole idea **without a card**. Free test mode uses free services everywhere:
 
-## What it costs (approximate, check each site for current prices)
-
-| Service | What it does | Cost |
+| Job | 🆓 Free test mode (no card) | 💎 Full mode (when you're convinced) |
 |---|---|---|
-| Claude API (Anthropic) | Finds topics, researches, writes scripts | Pay as you go, roughly $1–3 per video. Start with $20 credit. |
-| ElevenLabs | Your realistic voice-over | **Creator plan ≈ $22/month** (needed to clone your voice; about 10–12 videos a month including fixes) |
-| Pexels | Real stock video footage | Free |
-| Telegram | Where you review and approve videos | Free |
-| GitHub Actions | The "computer" that runs the studio | Free (your repo is public) |
-| YouTube | Your channel | Free |
+| AI brain (topics, research, scripts) | **Google Gemini** free key | **Claude**: best writing and live web research. Pay as you go, about $1–3 per video |
+| Voice-over | **ElevenLabs free plan**: realistic ready-made voices, about 10 minutes of speech a month | **ElevenLabs Creator** (about $22/month): **your own cloned voice** |
+| Stock footage | Pexels (free) | Pexels (free) |
+| Review on your phone | Telegram (free) | Telegram (free) |
+| Running everything | GitHub Actions (free) | GitHub Actions (free) |
+
+**Free mode limits, so you know what to expect:**
+- About **3 short videos a month** (3 minutes each), because of the free voice allowance.
+- The voice is a natural ElevenLabs voice, but **not yours**, and the free plan **doesn't allow commercial use** and asks you to credit ElevenLabs. Fine for testing; don't monetize those videos.
+- Gemini's free tier is good but writes a bit less sharply than Claude, and Google may use free-tier requests to improve its products.
+
+When you're happy with the results, the **"Upgrade to full mode"** section at the bottom takes about 10 minutes. No code changes.
+
+> ⏱️ Free setup takes about 45 minutes.
 
 ---
 
 ## Step 1: Put the studio on your main branch
 
-The studio code arrives as a pull request. GitHub only runs the daily automation from your **main** branch.
+The studio code arrives as a pull request. GitHub only runs the automation from your **main** branch.
 
-👉 Open the pull request link Claude gave you (or **Pull requests** tab in your repo), click the green **Merge pull request** button, then **Confirm merge**.
+👉 Open the pull request link Claude gave you (or the **Pull requests** tab in your repo), click the green **Merge pull request** button, then **Confirm merge**.
 
 ---
 
@@ -40,39 +45,32 @@ This is where the studio sends you each video to approve.
 5. It asks for a username ending in `bot`. Send something like: `uzorka_studio_bot` (try another if it's taken).
 6. BotFather replies with a long code like `7123456789:AAH...`.
    **📋 Save this as `TELEGRAM_BOT_TOKEN`.**
-7. Tap the link to your new bot (t.me/your_bot_name) and tap **Start**, then send it any message, e.g. `hello`.
+7. Tap the link to your new bot (t.me/your_bot_name), tap **Start**, then send it any message, e.g. `hello`.
    (You'll get your chat ID from this in Step 8.)
 
 ---
 
-## Step 3: Get your Claude API key (5 min)
+## Step 3: 🆓 Get a free Gemini key: the AI brain (3 min)
 
-1. Go to **https://console.anthropic.com** and sign up.
-2. Click **Settings → Billing** and add **$20** of credit. (You can turn on auto-reload later.)
-3. Click **Settings → API Keys → Create Key**. Name it `media-studio`.
-4. Copy the key (starts with `sk-ant-`). You can only see it once!
-   **📋 Save this as `ANTHROPIC_API_KEY`.**
+1. Go to **https://aistudio.google.com** and sign in with your Google account.
+2. Click **Get API key** (left menu) → **Create API key**. If asked, let it create a project for you.
+3. Copy the key (starts with `AIza`).
+   **📋 Save this as `GEMINI_API_KEY`.**
+
+No card is needed. Don't turn on billing for this test.
 
 ---
 
-## Step 4: Clone your voice on ElevenLabs (30–60 min)
+## Step 4: 🆓 Get a free ElevenLabs voice (10 min)
 
-This gives videos **your** real voice, not a robot.
-
-1. Go to **https://elevenlabs.io** and sign up.
-2. Subscribe to the **Creator** plan (click your profile → **Subscription**).
-3. Record your voice samples:
-   - Find a **quiet room** (closets full of clothes are great), phone 15–20 cm from your mouth.
-   - Read anything out loud in your natural "YouTube host" voice: tech articles, product reviews.
-   - **Professional Voice Clone** (best quality): about 30 minutes or more of clean audio.
-   - **Instant Voice Clone** (quick start): 1–3 minutes. You can upgrade to Professional later.
-4. In ElevenLabs click **Voices → + Add a new voice → Professional Voice Clone** (or Instant), upload your recordings and follow the steps (it asks you to verify it's your voice).
-   - Professional clones take a few hours to train. You can continue with the other steps meanwhile.
-5. Get your API key: click your profile (bottom left) → **API Keys → Create API Key**. Give it full access.
+1. Go to **https://elevenlabs.io** and sign up (free plan, no card).
+2. Pick a voice you like: click **Voices** (or **Voice Library**), listen to a few, and add one that sounds like a confident tech YouTuber to **My Voices**.
+   Good starting points among the default voices are deep, clear, conversational male or female voices. Choose whatever fits your channel.
+3. Get your API key: click your profile (bottom left) → **API Keys → Create API Key**.
    **📋 Save this as `ELEVENLABS_API_KEY`.**
-6. Get your voice ID: go to **Voices**, click the **⋯** next to your voice → **Copy voice ID**.
+4. Get the voice ID: in **My Voices**, click the **⋯** next to your voice → **Copy voice ID**.
    **📋 Save this as `ELEVENLABS_VOICE_ID`.**
-   (Don't worry if you can't find it. Step 8 prints all your voice IDs.)
+   (Can't find it? Step 8 prints all your voice IDs.)
 
 ---
 
@@ -92,6 +90,8 @@ This gives videos **your** real voice, not a robot.
 2. Verify your phone at **https://www.youtube.com/verify**. This unlocks custom thumbnails and videos longer than 15 minutes.
 3. Add a profile picture, banner and a short description in **YouTube Studio → Customization**.
 
+(You can skip this step while testing. You only need the channel when you publish.)
+
 ---
 
 ## Step 7: Give the studio your keys (GitHub Secrets) (10 min)
@@ -104,20 +104,21 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
 
    | Name | Value |
    |---|---|
-   | `ANTHROPIC_API_KEY` | from Step 3 |
+   | `GEMINI_API_KEY` | from Step 3 |
    | `ELEVENLABS_API_KEY` | from Step 4 |
    | `ELEVENLABS_VOICE_ID` | from Step 4 |
    | `PEXELS_API_KEY` | from Step 5 |
    | `TELEGRAM_BOT_TOKEN` | from Step 2 |
 
-4. Now click the **Variables** tab → **New repository variable** and add your channel settings:
+4. Now click the **Variables** tab → **New repository variable** and add:
 
-   | Name | Example value |
-   |---|---|
-   | `CHANNEL_NAME` | `Uzorka Tech` |
-   | `TARGET_MINUTES` | `8` |
-   | `CHANNEL_NICHE` | *(optional)* `AI tools, smartphones and the tech industry` |
-   | `CHANNEL_STYLE` | *(optional)* how you want to sound, e.g. `Calm, witty, honest, like MKBHD` |
+   | Name | Value | Why |
+   |---|---|---|
+   | `CHANNEL_NAME` | `Uzorka Tech` (your channel name) | shown on videos and thumbnails |
+   | `TARGET_MINUTES` | `3` | short test videos fit the free voice allowance |
+   | `DESCRIPTION_FOOTER` | `Voice generated with ElevenLabs (elevenlabs.io)` | the credit ElevenLabs' free plan asks for |
+   | `CHANNEL_NICHE` | *(optional)* `AI tools, smartphones and the tech industry` | what your channel covers |
+   | `CHANNEL_STYLE` | *(optional)* e.g. `Calm, witty, honest, like MKBHD` | how the scripts should sound |
 
 ---
 
@@ -128,6 +129,7 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
 3. Wait about a minute, click the run, then click **studio** to see the log. You'll see ✅ / ❌ for each key, plus:
    - `👉 Your TELEGRAM_CHAT_ID is: 123456789 (YourName)`
      **📋 Save this number** and add it as a new **Secret** named `TELEGRAM_CHAT_ID` (Step 7 again).
+   - `🧠 Gemini key works`
    - A list of your ElevenLabs voices with IDs (if you still need `ELEVENLABS_VOICE_ID`).
 4. Run **check** again. Your Telegram bot should message you: *"👋 Your studio is connected!"* 🎉
 
@@ -136,7 +138,7 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
 ## Step 9: See a sample video (10 min)
 
 1. **Actions → 🎬 Media Studio → Run workflow → demo**.
-2. In about 5–10 minutes you'll receive a short sample video in Telegram. It shows the visual style (animated titles, stock footage, captions, transitions) and uses your cloned voice if Step 4 is done.
+2. In about 5–10 minutes you'll receive a short sample video in Telegram showing the visual style (animated titles, stock footage, captions, transitions), voiced by the ElevenLabs voice you picked.
 
 ---
 
@@ -144,16 +146,16 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
 
 1. **Actions → 🎬 Media Studio → Run workflow → make**.
    (Optionally type your own topic in the "topic" box, e.g. `Is the new iPhone worth upgrading to?`)
-2. In about 30–60 minutes Telegram gets:
-   - the video (phone-quality preview) and a **Full quality** download link
+2. In about 20–40 minutes Telegram gets:
+   - the video and a **Full quality** download link
    - the title, alternative titles and why the topic was picked
 3. **Reply to that message** (swipe right on it in Telegram) with either:
    - `approve` → you get everything needed to upload (see Step 11)
-   - your notes, e.g. `1:20 the price is wrong, it's $799. Make the intro punchier and add a comparison with the Pixel.` → a fixed version comes back
+   - your notes, e.g. `0:40 the price is wrong, it's $799. Make the intro punchier.` → a fixed version comes back
    - `reject` → it's dropped
 4. Replies are picked up within about 10–20 minutes. A fixed version takes about 20–40 minutes more.
 
-**From now on it runs by itself:** every day at 06:17 UTC it picks the best trending topic and sends you a video.
+> 💡 In free mode each revision uses voice allowance too, so batch your notes into one reply.
 
 ### Telegram commands you can send any time
 | Send | What happens |
@@ -164,6 +166,10 @@ Secrets are stored encrypted. Nobody, including people who can see your code, ca
 | `/status` | What's in progress |
 | `/help` | Show these commands |
 
+### Turn on the daily automatic video (optional)
+Add a **Variable** named `DAILY_VIDEO` with value `on`. From then on, every day at 06:17 UTC the studio picks the best trending topic and sends you a video.
+In free mode, leave it off and use `/topics` and `/make` instead, so you don't run out of free voice minutes.
+
 ---
 
 ## Step 11: Publishing your approved video
@@ -173,10 +179,18 @@ When you reply `approve`, the bot sends: the thumbnail, a full-quality download 
 1. Download the video (tap the link).
 2. Open the **YouTube Studio** app or **studio.youtube.com** → **Create → Upload videos**.
 3. Paste the title, description and tags, and upload the thumbnail.
-4. Under **Altered content**, answer **Yes** (your voice is AI-generated; being honest protects your channel).
+4. Under **Altered content**, answer **Yes** (the voice is AI-generated; being honest protects your channel).
 5. Choose **Publish** or **Schedule**. Done! ✅
 
 > Why not upload automatically? YouTube locks videos uploaded by new, unaudited apps to "private". Automatic upload is ready in the code (see "Later" below) and can be switched on once Google approves your app.
+
+---
+
+## 💎 Upgrade to full mode (when you're convinced)
+
+1. **Claude brain:** create a key at **https://console.anthropic.com** (Settings → Billing: add credit; Settings → API Keys → Create Key) and add it as the Secret `ANTHROPIC_API_KEY`. The studio switches to Claude automatically, including live web research. You can delete `GEMINI_API_KEY`.
+2. **Your own voice:** subscribe to ElevenLabs **Creator**, then **Voices → Add a new voice → Professional Voice Clone**. Record about 30 minutes of yourself reading tech articles in a quiet room (a closet full of clothes works great). When it's trained, copy its voice ID into the `ELEVENLABS_VOICE_ID` Secret.
+3. **Variables:** change `TARGET_MINUTES` to `8`, delete `DESCRIPTION_FOOTER`, and add `DAILY_VIDEO` = `on`.
 
 ---
 
@@ -187,7 +201,7 @@ Download free tracks from **YouTube Studio → Audio Library** (choose "No attri
 On GitHub, open the folder `assets/music`, click **Add file → Upload files**, drop the MP3s in and click **Commit changes**. A random track plays quietly under each video.
 
 ### Better trending data from YouTube (free)
-1. Go to **https://console.cloud.google.com**, create a project named `media-studio`.
+1. Go to **https://console.cloud.google.com**, create a project named `video-team`.
 2. **APIs & Services → Library** → search **YouTube Data API v3** → **Enable**.
 3. **APIs & Services → Credentials → Create credentials → API key**. Copy it.
 4. Add it as a GitHub Secret named `YOUTUBE_API_KEY`.
@@ -199,8 +213,8 @@ Do this after your first few videos. Ask Claude to walk you through it. In short
 
 ## Good to know
 
-- **Your repo is public.** Scripts, research notes and the review videos (via the download link) can be seen by anyone who finds them. Your keys are safe in Secrets. If you'd rather keep drafts private, ask Claude about moving the studio to a private repo.
-- **Grow a channel YouTube trusts:** YouTube demonetizes mass-produced, templated AI channels. Your review notes, your real opinions and (over time) your own hands-on clips are what make this a real channel. Approve fewer, better videos rather than more.
+- **Your repo is public.** Scripts, research notes and the review videos (via the download link) can be seen by anyone who finds them. Your keys are safe in Secrets.
+- **Grow a channel YouTube trusts:** YouTube demonetizes mass-produced, templated AI channels. Your review notes, your real opinions and (over time) your own voice and hands-on clips are what make this a real channel. Approve fewer, better videos rather than more.
 - **Facts:** the studio only scripts from its research brief and lists sources in the description, but you're the editor. Check prices, specs and dates before approving.
 - **Something failed?** You'll get a ⚠️ message in Telegram. Reply `retry`. You can also look at the red ❌ run in the **Actions** tab and send the error to Claude.
 - The video engine (Remotion) is free for individuals and companies of up to 3 people.

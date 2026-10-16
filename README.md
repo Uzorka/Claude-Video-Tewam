@@ -2,15 +2,15 @@
 
 An AI production team for a tech/AI YouTube channel. Every day it finds what's trending, researches it, writes a script, records the voice-over in your cloned voice, edits a motion-graphics video with stock footage and captions, and sends it to you on Telegram. You reply `approve` or send notes, and it fixes and re-sends.
 
-👉 **New here? Start with [SETUP.md](SETUP.md).**
+👉 **New here? Start with [SETUP.md](SETUP.md).** You can test it for free (Gemini + ElevenLabs free plan), no card needed.
 
 ## The team
 
 | Role | File | Tool |
 |---|---|---|
-| Trend scout | `src/pipeline/trends.ts` | Hacker News, Reddit, Google News, Google Trends, YouTube trending → Claude ranks |
-| Researcher | `src/pipeline/research.ts` | Claude + live web search, writes a sourced brief |
-| Writer & director | `src/pipeline/script.ts` | Claude writes the script and plans every scene |
+| Trend scout | `src/pipeline/trends.ts` | Hacker News, Reddit, Google News, Google Trends, YouTube trending → the AI ranks them |
+| Researcher | `src/pipeline/research.ts`, `src/pipeline/sources.ts` | Claude + live web search, or (free mode) Gemini reading articles the studio downloads |
+| Writer & director | `src/pipeline/script.ts` | The AI (Claude or Gemini) writes the script and plans every scene |
 | Voice | `src/pipeline/voice.ts` | ElevenLabs (your cloned voice) with word-level timing |
 | B-roll & captures | `src/pipeline/visuals.ts` | Pexels stock video, Playwright web-page captures, music |
 | Editor | `src/video/*` | Remotion (React): kinetic titles, stats, lists, comparisons, captions, transitions, thumbnail |
