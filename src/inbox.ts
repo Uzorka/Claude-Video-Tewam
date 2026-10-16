@@ -1,4 +1,4 @@
-import { config } from "./config.js";
+import { config, saveEnv } from "./config.js";
 import { demoPlan } from "./demo.js";
 import { createJob, listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
@@ -19,7 +19,8 @@ Commands:
 • <code>/make 2</code> – make topic #2 from the last /topics list
 • <code>/new your topic here</code> – make a video on any topic you choose
 • <code>/status</code> – what's in progress
-• <code>/demo</code> – a short sample video to check the style and voice`;
+• <code>/demo</code> – a short sample video to check the style and voice
+• <code>/voices</code> – list voices, then <code>/voice ID</code> to switch`;
 
 const APPROVE = /^(approve|approved|yes|publish|go|ship it|looks good|lgtm|✅|👍)[.!]*$/i;
 const REJECT = /^(reject|rejected|drop|skip|no|cancel|🗑️?|👎)[.!]*$/i;
@@ -33,6 +34,12 @@ function findJob(msg: TgMessage, jobs: Job[]): Job | undefined {
   }
   // Not a reply: assume the most recent video waiting for you.
   return [...jobs].reverse().find((j) => j.status === "in_review" || j.status === "failed");
+}
+
+async function listVoices() {
+  const res = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": config.elevenlabs.apiKey } });
+  if (!res.ok) throw new Error(`ElevenLabs rejected the request (${res.status}). Check ELEVENLABS_API_KEY.`);
+  return ((await res.json()) as { voices: { voice_id: string; name: string; category: string }[] }).voices;
 }
 
 function customTopic(text: string): Topic {
@@ -65,6 +72,26 @@ export async function processInbox({ quiet = false } = {}) {
         await sendMessage("🎬 Making a short sample video. It takes about 5 minutes…");
         const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Requested from Telegram", score: 0, source_urls: [] });
         await produceAndReview(job, demoPlan);
+      });
+    } else if (/^\/voices\b/i.test(text)) {
+      tasks.push(async () => {
+        const voices = await listVoices();
+        const premade = voices.filter((v) => v.category === "premade");
+        const other = voices.filter((v) => v.category !== "premade");
+        await sendMessage(
+          `🎙️ <b>Voices you can use on the free plan</b> (tap an ID to copy it):\n\n${premade
+            .map((v) => `• ${esc(v.name)}\n<code>${v.voice_id}</code>`)
+            .join("\n")}${other.length ? `\n\n<i>Voices marked cloned/professional/library need a paid plan.</i>` : ""}\n\nThen send: <code>/voice ID</code>\nCurrent voice: <code>${esc(config.elevenlabs.voiceId || "none")}</code>`,
+        );
+      });
+    } else if (/^\/voice\s+\S+/i.test(text)) {
+      const id = text.split(/\s+/)[1];
+      tasks.push(async () => {
+        const voice = (await listVoices()).find((v) => v.voice_id === id);
+        if (!voice) return void (await sendMessage("I couldn't find that voice ID on your ElevenLabs account. Send /voices to see the list."));
+        saveEnv("ELEVENLABS_VOICE_ID", id);
+        config.elevenlabs.voiceId = id;
+        await sendMessage(`✅ Voice changed to <b>${esc(voice.name)}</b>. Send /demo to hear it.`);
       });
     } else if (/^\/status\b/i.test(text)) {
       const active = jobs.filter((j) => !["published", "rejected", "approved"].includes(j.status));
@@ -109,5 +136,12 @@ export async function processInbox({ quiet = false } = {}) {
   }
   // Save the offset first so a crash never makes us re-handle the same message forever.
   writeState("telegram", state);
-  for (const task of tasks) await task();
+  for (const task of tasks) {
+    try {
+      await task();
+    } catch (e) {
+      console.error(`⚠️  ${(e as Error).message}`);
+      await sendMessage(`⚠️ ${esc((e as Error).message)}`).catch(() => {});
+    }
+  }
 }

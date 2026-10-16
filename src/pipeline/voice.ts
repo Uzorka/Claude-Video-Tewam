@@ -57,6 +57,13 @@ async function elevenLabs(text: string, previous: string, next: string, outFile:
       await new Promise((r) => setTimeout(r, 2000 * attempt));
       continue;
     }
+    if (res.status === 402 || /paid_plan_required|payment_required/.test(body)) {
+      throw new Error(
+        "This ElevenLabs voice needs a paid plan. On the free plan, use a voice marked (premade): send /voices in Telegram, then /voice followed by the ID you like.",
+      );
+    }
+    if (res.status === 401) throw new Error("ElevenLabs rejected the API key. Check ELEVENLABS_API_KEY.");
+    if (/quota_exceeded/.test(body)) throw new Error("Your ElevenLabs credits for this month are used up. Wait for the monthly reset or upgrade.");
     throw new Error(`ElevenLabs error ${res.status}: ${body.slice(0, 300)}`);
   }
 }

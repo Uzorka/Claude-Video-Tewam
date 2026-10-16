@@ -1,4 +1,5 @@
 import "dotenv/config";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -67,4 +68,14 @@ export function requireKeys(...names: string[]) {
       `Missing settings: ${missing.join(", ")}. Add them as GitHub Secrets (see SETUP.md).`,
     );
   }
+}
+
+/** Save one setting into the .env file (used when running on your own computer). */
+export function saveEnv(name: string, value: string) {
+  const file = path.join(ROOT, ".env");
+  const lines = fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n").filter((l) => !l.startsWith(`${name}=`)) : [];
+  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
+  lines.push(`${name}=${value}`);
+  fs.writeFileSync(file, lines.join("\n") + "\n");
+  process.env[name] = value;
 }
