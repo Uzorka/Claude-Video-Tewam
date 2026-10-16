@@ -1,0 +1,101 @@
+import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
+import type { RenderProps, RenderScene } from "../types";
+import { fadeIn } from "./anim";
+import { Backdrop, Footage, PageScroll } from "./Background";
+import { Captions } from "./Captions";
+import { CompareCard, ListCard, LowerThird, QuoteCard, StatCard, TitleCard } from "./scenes/Cards";
+import { FPS, theme } from "./theme";
+
+const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: number }> = ({ scene, index, durationInFrames }) => {
+  const frame = useCurrentFrame();
+  const isBroll = scene.kind === "broll" && scene.broll;
+  // Entrance: a quick zoom-settle so every cut has energy.
+  const enter = interpolate(frame, [0, 9], [1.06, 1], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
+
+  let foreground: React.ReactNode = null;
+  switch (scene.kind) {
+    case "title":
+      foreground = <TitleCard scene={scene} />;
+      break;
+    case "stat":
+      foreground = <StatCard scene={scene} />;
+      break;
+    case "list":
+      foreground = <ListCard scene={scene} durationInFrames={durationInFrames} />;
+      break;
+    case "compare":
+      foreground = <CompareCard scene={scene} />;
+      break;
+    case "quote":
+      foreground = <QuoteCard scene={scene} />;
+      break;
+    case "screenshot":
+      foreground = scene.image ? <PageScroll src={scene.image} durationInFrames={durationInFrames} /> : <TitleCard scene={scene} />;
+      break;
+    case "broll":
+      foreground = isBroll ? <LowerThird scene={scene} /> : <TitleCard scene={scene} />;
+      break;
+  }
+
+  return (
+    <AbsoluteFill style={{ transform: `scale(${enter})`, opacity: fadeIn(frame, 0, 4) }}>
+      {scene.broll ? (
+        <Footage scene={scene} durationInFrames={durationInFrames} dim={isBroll ? 0.25 : 0.88} blur={isBroll ? 0 : 8} />
+      ) : (
+        <Backdrop seed={index} />
+      )}
+      {foreground}
+      {scene.audio && <Audio src={staticFile(scene.audio)} />}
+    </AbsoluteFill>
+  );
+};
+
+/** Accent-colored slash that wipes across at each cut. */
+const CutFlash: React.FC = () => {
+  const frame = useCurrentFrame();
+  const x = interpolate(frame, [0, 8], [-40, 140], { extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none" }}>
+      <div style={{ position: "absolute", top: -200, bottom: -200, left: `${x}%`, width: 60, background: theme.accent, transform: "skewX(-18deg)", opacity: 0.85 }} />
+    </AbsoluteFill>
+  );
+};
+
+const Chrome: React.FC<{ channelName: string }> = ({ channelName }) => {
+  const frame = useCurrentFrame();
+  const { durationInFrames } = useVideoConfig();
+  return (
+    <AbsoluteFill style={{ pointerEvents: "none", fontFamily: theme.font }}>
+      <div style={{ position: "absolute", top: 0, left: 0, height: 6, width: `${(frame / durationInFrames) * 100}%`, background: theme.accent }} />
+      <div style={{ position: "absolute", top: 40, right: 54, fontSize: 24, fontWeight: 800, letterSpacing: 4, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
+        <span style={{ color: theme.accent }}>●</span> {channelName}
+      </div>
+    </AbsoluteFill>
+  );
+};
+
+export const Video: React.FC<RenderProps> = ({ scenes, music, channelName }) => {
+  let from = 0;
+  return (
+    <AbsoluteFill style={{ backgroundColor: theme.bg }}>
+      {scenes.map((scene, i) => {
+        const durationInFrames = Math.round(scene.duration * FPS);
+        const start = from;
+        from += durationInFrames;
+        return (
+          <Sequence key={scene.id + i} from={start} durationInFrames={durationInFrames} name={`${i + 1}. ${scene.kind}: ${scene.id}`}>
+            <Scene scene={scene} index={i} durationInFrames={durationInFrames} />
+            <Captions words={scene.words} />
+            {i > 0 && (
+              <Sequence durationInFrames={9}>
+                <CutFlash />
+              </Sequence>
+            )}
+          </Sequence>
+        );
+      })}
+      <Chrome channelName={channelName} />
+      {music && <Audio src={staticFile(music)} volume={0.1} loop />}
+    </AbsoluteFill>
+  );
+};
