@@ -1,6 +1,4 @@
-import fs from "node:fs";
-import path from "node:path";
-import { ROOT, config, requireKeys } from "./config.js";
+import { config, requireKeys, saveEnv } from "./config.js";
 import { createJob, readState, writeState } from "./jobs.js";
 import { demoPlan } from "./demo.js";
 import { processInbox } from "./inbox.js";
@@ -51,7 +49,7 @@ async function check() {
     const res = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": config.elevenlabs.apiKey } });
     if (res.ok) {
       const { voices } = (await res.json()) as { voices: { voice_id: string; name: string; category: string }[] };
-      console.log("\n🎙️ Voices on your ElevenLabs account (use the id as ELEVENLABS_VOICE_ID):");
+      console.log("\n🎙️ Voices on your ElevenLabs account (use the id as ELEVENLABS_VOICE_ID; on the free plan pick one marked premade):");
       for (const v of voices.slice(0, 30)) console.log(`   ${v.voice_id}  ${v.name} (${v.category})`);
     } else console.log(`\n❌ ElevenLabs rejected the API key (${res.status}).`);
   }
@@ -81,16 +79,6 @@ async function autoMake(custom?: string) {
 }
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
-
-/** Save one setting into the .env file (used when running on your own computer). */
-function saveEnv(name: string, value: string) {
-  const file = path.join(ROOT, ".env");
-  const lines = fs.existsSync(file) ? fs.readFileSync(file, "utf8").split("\n").filter((l) => !l.startsWith(`${name}=`)) : [];
-  while (lines.length && !lines[lines.length - 1].trim()) lines.pop();
-  lines.push(`${name}=${value}`);
-  fs.writeFileSync(file, lines.join("\n") + "\n");
-  process.env[name] = value;
-}
 
 type TgPeek = { ok: boolean; description?: string; result?: { update_id: number; message?: { date: number; chat: { id: number; first_name?: string } } }[] };
 

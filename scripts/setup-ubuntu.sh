@@ -40,7 +40,7 @@ ask() {
 }
 ask GEMINI_API_KEY "Gemini API key (starts with AIza)"
 ask ELEVENLABS_API_KEY "ElevenLabs API key"
-ask ELEVENLABS_VOICE_ID "ElevenLabs voice ID"
+ask ELEVENLABS_VOICE_ID "ElevenLabs voice ID (free plan: use a premade voice, e.g. Brian)" "nPczCjzI2devNBz1zQrb"
 ask TELEGRAM_BOT_TOKEN "Telegram bot token (from BotFather)"
 ask CHANNEL_NAME "Your channel name" "Uzorka Tech"
 ask CHANNEL_NICHE "What your channel covers" "AI tools, smartphones and the tech industry"
