@@ -109,4 +109,5 @@ export type Job = {
   fullVideoUrl: string | null;
   youtubeId: string | null;
   error: string | null;
+  autoRetries?: number;
 };

@@ -3,7 +3,7 @@ import { createJob, readState, writeState } from "./jobs.js";
 import { demoPlan } from "./demo.js";
 import { processInbox } from "./inbox.js";
 import { scoutTopics } from "./pipeline/trends.js";
-import { makeVideo, produceAndReview } from "./produce.js";
+import { makeVideo, produceAndReview, retryBusyJobs } from "./produce.js";
 import { esc, sendMessage } from "./telegram.js";
 import type { Topic } from "./types.js";
 
@@ -113,9 +113,11 @@ async function serve() {
   console.log("🎬 Your studio is running. Leave this window open (closing it stops the studio).");
   console.log("   Talk to it from Telegram. Press Ctrl+C here to stop.\n");
   await sendMessage("🟢 Studio is online. Send /topics to see what's trending, or /new your topic to make a video.");
+  process.env.STUDIO_SERVE = "1";
   for (;;) {
     try {
       await processInbox({ quiet: true });
+      await retryBusyJobs();
       const today = new Date().toLocaleDateString("en-CA");
       if (process.env.DAILY_VIDEO === "on" && new Date().getHours() >= dailyHour && readState("daily", { last: "" }).last !== today) {
         writeState("daily", { last: today });

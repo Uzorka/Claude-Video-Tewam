@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { OUT_DIR, PUBLIC_DIR, config } from "./config.js";
 import { releaseUrl, downloadRelease, releasesEnabled, tarDir, untar, uploadRelease } from "./github.js";
-import { createJob, jobDir, jobMediaDir, loadPlan, loadText, saveJob, savePlan, saveText } from "./jobs.js";
+import { createJob, jobDir, jobMediaDir, listJobs, loadPlan, loadText, saveJob, savePlan, saveText } from "./jobs.js";
 import { fmtTime } from "./pipeline/media.js";
 import { makePreview, renderVideo } from "./pipeline/render.js";
 import { researchTopic } from "./pipeline/research.js";
@@ -192,9 +192,31 @@ async function failJob(job: Job, e: unknown) {
   job.status = "failed";
   job.error = message;
   saveJob(job);
+  const willRetry = AUTO_RETRY.test(message) && process.env.STUDIO_SERVE === "1" && (job.autoRetries ?? 0) < MAX_AUTO_RETRIES;
   const ids = await sendMessage(
-    `⚠️ Something went wrong on <b>${esc(job.topic.title)}</b>:\n<code>${esc(message.slice(0, 500))}</code>\n\nReply <code>retry</code> to this message to try again.`,
+    `⚠️ Something went wrong on <b>${esc(job.topic.title)}</b>:\n<code>${esc(message.slice(0, 500))}</code>\n\n${
+      willRetry ? "⏳ I'll try again by myself in about 15 minutes. You can also reply <code>retry</code> to try now." : "Reply <code>retry</code> to this message to try again."
+    }`,
   ).catch(() => []);
   job.reviewMessageIds.push(...ids);
   saveJob(job);
+}
+
+/** Failures caused by a busy or rate-limited AI service are worth retrying later by themselves. */
+const AUTO_RETRY = /busy|high demand|overloaded|rate.?limit|quota|503|429|ETIMEDOUT|ECONNRESET|fetch failed/i;
+const MAX_AUTO_RETRIES = 3;
+const RETRY_AFTER_MS = 15 * 60 * 1000;
+
+/** Laptop mode: quietly retry videos that failed only because a service was busy. */
+export async function retryBusyJobs() {
+  for (const job of listJobs()) {
+    if (job.status !== "failed" || !AUTO_RETRY.test(job.error ?? "")) continue;
+    if ((job.autoRetries ?? 0) >= MAX_AUTO_RETRIES) continue;
+    if (Date.now() - new Date(job.updatedAt).getTime() < RETRY_AFTER_MS) continue;
+    job.autoRetries = (job.autoRetries ?? 0) + 1;
+    saveJob(job);
+    console.log(`🔁 Auto-retry ${job.autoRetries}/${MAX_AUTO_RETRIES}: ${job.topic.title}`);
+    await retryJob(job);
+    return; // one at a time
+  }
 }
