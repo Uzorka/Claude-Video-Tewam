@@ -4,3 +4,5 @@ public/jobs
 .env
 # Rendered media and downloaded assets are stored as GitHub Release files, not in git.
 jobs/*/media
+# Your own photos/clips stay on your computer.
+assets/library/

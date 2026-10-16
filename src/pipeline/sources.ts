@@ -1,6 +1,6 @@
 import type { Topic } from "../types.js";
 
-export type SourceArticle = { url: string; title: string; text: string };
+export type SourceArticle = { url: string; title: string; text: string; image: string | null };
 
 const UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130 Safari/537.36";
 
@@ -21,7 +21,17 @@ const decode = (s: string) =>
     .replace(/&#(\d+);/g, (_, n) => String.fromCharCode(Number(n)));
 
 /** Rough "reader mode": keep paragraphs and headings, drop scripts, menus and footers. */
-export function extractText(html: string) {
+export function extractText(html: string, pageUrl = "https://example.com/") {
+  const meta = (prop: string) =>
+    html.match(new RegExp(`<meta[^>]+(?:property|name)=["']${prop}["'][^>]*content=["']([^"']+)["']`, "i"))?.[1] ??
+    html.match(new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]*(?:property|name)=["']${prop}["']`, "i"))?.[1];
+  const rawImage = meta("og:image") ?? meta("twitter:image");
+  let image: string | null = null;
+  try {
+    image = rawImage ? new URL(decode(rawImage), pageUrl).href : null;
+  } catch {
+    image = null;
+  }
   const title = decode(html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? "");
   const body = html
     .replace(/<(script|style|noscript|svg|nav|footer|header|aside|form)[\s\S]*?<\/\1>/gi, " ")
@@ -29,7 +39,7 @@ export function extractText(html: string) {
   const blocks = [...body.matchAll(/<(p|h1|h2|h3|li)[^>]*>([\s\S]*?)<\/\1>/gi)]
     .map((m) => decode(m[2].replace(/<[^>]+>/g, " ")).replace(/\s+/g, " ").trim())
     .filter((t) => t.length > 40);
-  return { title, text: blocks.join("\n") };
+  return { title, text: blocks.join("\n"), image };
 }
 
 async function bingNews(query: string): Promise<string[]> {
@@ -65,9 +75,9 @@ export async function gatherSources(topic: Topic, max = 8): Promise<SourceArticl
     if (articles.length >= max) break;
     if (/youtube\.com|youtu\.be|twitter\.com|x\.com|reddit\.com|\.pdf$/i.test(url)) continue;
     try {
-      const { title, text } = extractText(await get(url));
+      const { title, text, image } = extractText(await get(url), url);
       if (text.length < 600) continue; // paywalled or empty
-      articles.push({ url, title, text: text.slice(0, 7000) });
+      articles.push({ url, title, text: text.slice(0, 7000), image });
       console.log(`  ✓ ${title.slice(0, 70) || url}`);
     } catch {
       // unreachable page: skip

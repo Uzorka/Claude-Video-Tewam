@@ -10,6 +10,9 @@ export type TgMessage = {
   text?: string;
   caption?: string;
   reply_to_message?: { message_id: number };
+  photo?: { file_id: string; width: number; height: number; file_size?: number }[];
+  video?: { file_id: string; duration: number; file_size?: number; mime_type?: string };
+  document?: { file_id: string; file_name?: string; mime_type?: string; file_size?: number };
 };
 export type TgUpdate = { update_id: number; message?: TgMessage };
 
@@ -67,3 +70,14 @@ export const sendVideo = (file: string, captionHtml: string) => sendFile("sendVi
 export const sendPhoto = (file: string, captionHtml: string) => sendFile("sendPhoto", "photo", file, captionHtml);
 
 export const getUpdates = (offset: number) => call<TgUpdate[]>("getUpdates", { offset, timeout: 0, allowed_updates: ["message"] });
+
+/** Download a photo/video someone sent the bot (Telegram allows bots up to 20 MB). */
+export async function downloadTelegramFile(fileId: string, dest: string) {
+  const info = await call<{ file_path?: string }>("getFile", { file_id: fileId });
+  if (!info.file_path) throw new Error("Telegram didn't give a download link for that file.");
+  const res = await fetch(`https://api.telegram.org/file/bot${config.telegram.botToken}/${info.file_path}`);
+  if (!res.ok) throw new Error(`Couldn't download the file from Telegram (${res.status}).`);
+  fs.mkdirSync(path.dirname(dest), { recursive: true });
+  fs.writeFileSync(dest, Buffer.from(await res.arrayBuffer()));
+  return dest;
+}
