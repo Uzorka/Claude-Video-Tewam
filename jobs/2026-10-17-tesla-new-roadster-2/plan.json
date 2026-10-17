@@ -1,0 +1,345 @@
+{
+  "title": "Tesla's Flying Roadster: Genius Engineering or Broken Promise?",
+  "alt_titles": [
+    "The New Tesla Roadster Actually Flies. Here's The Catch.",
+    "Tesla Roadster 2.0: 0-60 in 0.81s, But at What Cost?",
+    "Tesla Roadster Reveal: Why Elon Cut the Range in Half"
+  ],
+  "thumbnail_text": "IT ACTUALLY FLIES",
+  "description": "Tesla unveiled the redesigned next-gen Roadster with SpaceX cold-gas thrusters and suction fans, but slashed range in half and pushed deliveries to 2028.\n\nHere is our honest breakdown of the engineering specs, reservation prices, and street-legality reality.\n\nSources:\n- Mashable: https://mashable.com/tech/tesla-roadster-flying\n- USA Today: https://www.usatoday.com/story/cars/news/2026/10/16/tesla-roadster-flying-spacex-thrusters/92279108007/\n- Digital Trends: https://www.digitaltrends.com/cars/tesla-roadster-range-cut-620-to-300-miles/",
+  "tags": [
+    "Tesla Roadster",
+    "Tesla",
+    "Elon Musk",
+    "Electric Vehicles",
+    "SpaceX Thrusters",
+    "Supercars",
+    "Tesla News"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Tesla just demonstrated a car that hits zero to sixty in 0.81 seconds, drives completely upside down, and kickflips mid-air over a fleet of trucks.",
+      "kind": "stat",
+      "broll_query": "night highway traffic",
+      "heading": "Zero to Sixty",
+      "subheading": "October 2026 Texas demonstration",
+      "stat_value": "0.81 s",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "intro_payoff",
+      "narration": "Nearly nine years after its first debut, the new Tesla Roadster is back. By the end of this video, you will know if this is the ultimate electric supercar, or the world's most expensive distraction.",
+      "kind": "product",
+      "broll_query": null,
+      "heading": "The Next-Gen Roadster",
+      "subheading": "Nearly a decade in waiting",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Tesla Roadster"
+    },
+    {
+      "id": "timeline_delays",
+      "narration": "When Elon Musk first unveiled the Roadster prototype alongside the Semi in 2017, deliveries were slated for 2020. That slipped to 2022, then 2023, and now Tesla says production in Texas will not even start until 2028.",
+      "kind": "timeline",
+      "broll_query": null,
+      "heading": "The Delivery Roadmap",
+      "subheading": "Years of slipping target dates",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": [
+        {
+          "date": "Nov 2017",
+          "label": "Original concept revealed"
+        },
+        {
+          "date": "2020",
+          "label": "Original delivery target"
+        },
+        {
+          "date": "2023",
+          "label": "Secondary delay window"
+        },
+        {
+          "date": "2028",
+          "label": "Current Texas production target"
+        }
+      ],
+      "product": null
+    },
+    {
+      "id": "specs_performance",
+      "narration": "The numbers they showed off in McGregor, Texas are undeniably wild. Dual electric motors push over 1,340 horsepower, launching the 3,700-pound chassis under a second, with engineering lead Lars Moravy confirming top speeds beyond 230 miles per hour.",
+      "kind": "specs",
+      "broll_query": null,
+      "heading": "Headline Performance",
+      "subheading": "Demonstration track metrics",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": [
+        {
+          "label": "0 to 60 mph",
+          "value": "0.81 s"
+        },
+        {
+          "label": "Peak Output",
+          "value": "1,340+ hp"
+        },
+        {
+          "label": "Engineering Top Speed",
+          "value": "230+ mph"
+        },
+        {
+          "label": "Curb Weight",
+          "value": "~3,700 lbs"
+        }
+      ],
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "process_suction",
+      "narration": "So how does it stick to the ceiling? Four electric fans draw eighty kilowatts beneath adjustable ground skirts, pulling a low-pressure vacuum. That generates an alleged 4,700 kilograms of downforce, letting it corner past two Gs and literally drive upside down.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "Inverted Fan Suction",
+      "subheading": "How ground effect suction works",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "🌀",
+          "label": "Four fans draw 80kW"
+        },
+        {
+          "icon": "🏎️",
+          "label": "Skirts seal underbody"
+        },
+        {
+          "icon": "⚓",
+          "label": "4,700 kg downforce pulled"
+        },
+        {
+          "icon": "🔄",
+          "label": "Drives inverted on ramp"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "process_thrusters",
+      "narration": "Then comes the flight trick. Instead of rocket propellant, ten cold-gas nozzles borrow ultra-high-pressure compressed air tanks straight from SpaceX. The air pulses produce four to five times the force of normal tire grip, tossing the car up into short, controlled hops.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "Cold-Gas Flight System",
+      "subheading": "SpaceX compressed air thrusters",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "🧯",
+          "label": "Compressed air storage"
+        },
+        {
+          "icon": "🚀",
+          "label": "Ten cold-gas nozzles fire"
+        },
+        {
+          "icon": "💨",
+          "label": "5x tire grip thrust"
+        },
+        {
+          "icon": "🛬",
+          "label": "Mid-air hop and landing"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "compare_range_cut",
+      "narration": "But to make that happen, Tesla quietly gutted one of its biggest original selling points. In 2017, Musk promised 620 miles of range. In this new build, that estimate has been slashed roughly in half, down to around 310 miles.",
+      "kind": "compare",
+      "broll_query": null,
+      "heading": "The Range Reality",
+      "subheading": "Original promise versus current reality",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "2017 Promise",
+        "points": [
+          "620 miles range",
+          "200 kWh battery pack",
+          "Grand touring design"
+        ]
+      },
+      "right": {
+        "label": "2026 Reality",
+        "points": [
+          "310 to 320 miles range",
+          "Undisclosed battery size",
+          "Extreme track focus"
+        ]
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "list_trims",
+      "narration": "If you want to buy one, the line gets weird fast. The base Performance trim demands a fifty thousand dollar reservation. Stepping up to the Thrust model requires a quarter-million dollar deposit, while the flying Rocket edition is strictly invite-only, ripping out the passenger seat for extra air tanks.",
+      "kind": "list",
+      "broll_query": null,
+      "heading": "Three Trim Levels",
+      "subheading": "Staggered reservation tiers",
+      "stat_value": null,
+      "items": [
+        "Performance: $50,000 deposit",
+        "Thrust: $250,000 deposit with 200L tank",
+        "Rocket: Invite-only single-seater with 600L tank"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "quote_street_legal",
+      "narration": "And do not expect to drive it to the grocery store just yet. The car lacks traditional side mirrors, and when an audience member asked if it is street-legal, Musk dodged, admitting it depends on your street.",
+      "kind": "quote",
+      "broll_query": null,
+      "heading": "\"Depends on your street. It’ll be a viable car.\"",
+      "subheading": "Elon Musk on vehicle street legality",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "screenshot_coverage",
+      "narration": "The engineering pivot is clear. Tesla traded everyday grand touring utility for pure track theatrics, dropping bespoke nickel-based cells into an eight hundred volt pack that charges at five hundred kilowatts, but empties fast under full boost.",
+      "kind": "screenshot",
+      "broll_query": null,
+      "heading": "Engineering Trade-offs",
+      "subheading": "Digital Trends coverage on battery cuts",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://www.digitaltrends.com/cars/tesla-roadster-range-cut-620-to-300-miles/",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "broll_spectacle",
+      "narration": "During the demonstration, fans whined so loudly that spectators hundreds of feet away needed earplugs. Musk even ran the demo unmanned, openly conceding that the car is not necessarily optimized for safety, just to make sure nobody got hurt.",
+      "kind": "broll",
+      "broll_query": "engineers working in high tech lab",
+      "heading": "The Safety Factor",
+      "subheading": "Unmanned stunt and extreme noise",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "stat_price_delay",
+      "narration": "More importantly, Tesla never actually announced the final sticker price for any of these trims. Early reservation holders who put down money almost a decade ago are still waiting, now staring at a 2028 production target.",
+      "kind": "stat",
+      "broll_query": "stacks of money cash",
+      "heading": "Target Production Year",
+      "subheading": "Total retail price still unannounced",
+      "stat_value": "2028",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "verdict_take",
+      "narration": "The new Roadster is an unbelievable engineering flex and easily one of the wildest PR spectacles of the decade. But it is fundamentally solving problems nobody asked for, while walking back the practical car people paid for.",
+      "kind": "title",
+      "broll_query": null,
+      "heading": "Spectacle Over Delivery",
+      "subheading": "A halo car built for headlines",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "outro",
+      "narration": "Until it can legally pull out of a driveway with an actual driver inside, it is brilliant science fiction theater. If you want honest breakdowns of where tech is really headed, hit subscribe.",
+      "kind": "broll",
+      "broll_query": "sunset on empty highway road",
+      "heading": "The Final Verdict",
+      "subheading": "Subscribe for honest tech analysis",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    }
+  ]
+}
