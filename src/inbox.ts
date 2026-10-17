@@ -135,7 +135,7 @@ export async function processInbox({ quiet = false } = {}) {
           want
             ? `🎞 <b>YouTube clips: on.</b> Product scenes will use a few muted seconds from the maker's own YouTube channel (e.g. Apple's announcement videos), credited in the description.
 
-⚠️ That footage belongs to the maker. Short muted clips with your commentary are common on tech channels, but YouTube's Content ID can still flag a video (earnings go to the owner, or it's blocked in some countries). YouTube also often blocks downloads from the cloud computer, so some videos will fall back to photos. Send <code>/ytclips off</code> any time.`
+⚠️ That footage belongs to the maker. Short muted clips with your commentary are common on tech channels, but YouTube's Content ID can still flag a video (earnings go to the owner, or it's blocked in some countries). YouTube blocks downloads from the cloud computer unless it's signed in: see "YouTube clips" in SETUP.md to add the <code>YT_COOKIES</code> secret from a spare YouTube account. Until then, product scenes fall back to photos. Send <code>/ytclips off</code> any time.`
             : "🎞 YouTube clips: off. Product scenes use official photos, press clips and your own footage.",
         );
       });

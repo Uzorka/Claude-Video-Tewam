@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { readSettings } from "../config.js";
 import { brandOf, coreWords, mentions, otherModel } from "../productName.js";
@@ -45,7 +46,22 @@ const HANDLES: Record<string, string> = {
 
 type Entry = { id: string; title?: string; channel?: string; uploader?: string; duration?: number; channel_is_verified?: boolean };
 
-const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...args]);
+/**
+ * YouTube blocks downloads from cloud servers ("confirm you're not a bot") unless signed in.
+ * YT_COOKIES (a GitHub secret) holds cookies exported from a SPARE YouTube account; on a laptop it usually isn't needed.
+ */
+let cookieFile: string | null = null;
+function cookies() {
+  const text = (process.env.YT_COOKIES ?? "").trim();
+  if (!text) return [];
+  if (!cookieFile) {
+    cookieFile = path.join(os.tmpdir(), "yt-cookies.txt");
+    fs.writeFileSync(cookieFile, text.startsWith("# ") ? `${text}\n` : `# Netscape HTTP Cookie File\n${text}\n`, { mode: 0o600 });
+  }
+  return ["--cookies", cookieFile];
+}
+
+const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...cookies(), ...args]);
 
 /** The maker's own videos about this exact product, short ones (announcements, ads, hands-on) first. */
 export async function officialYouTubeVideos(product: string): Promise<{ id: string; title: string; duration: number; channel: string }[]> {

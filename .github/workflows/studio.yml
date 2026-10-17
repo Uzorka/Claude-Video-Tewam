@@ -59,6 +59,7 @@ jobs:
       PRODUCT_PHOTOS: ${{ vars.PRODUCT_PHOTOS }}
       OFFICIAL_MEDIA: ${{ vars.OFFICIAL_MEDIA }}
       YOUTUBE_CLIPS: ${{ vars.YOUTUBE_CLIPS }}
+      YT_COOKIES: ${{ secrets.YT_COOKIES }}
       YT_DEBUG: ${{ vars.YT_DEBUG || (inputs.action == 'photos' && '1' || '') }}
       CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
       CHANNEL_NICHE: ${{ vars.CHANNEL_NICHE }}

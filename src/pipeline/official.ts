@@ -137,7 +137,7 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
             .filter((l) => {
               const u = new URL(l.href);
               const about = mentions(u.pathname.replace(/[/_-]+/g, " "), product) || mentions(l.text, product);
-              return u.hostname === host && !visited.has(l.href.replace(/[#?].*$/, "")) && about && !otherModel(u.pathname, product) && !/support|applecare|account|login|sign/i.test(l.href);
+              return u.hostname === host && !/\.(zip|jpe?g|png|pdf|mp4|mov)$/i.test(u.pathname) && !visited.has(l.href.replace(/[#?].*$/, "")) && about && !otherModel(u.pathname, product) && !/support|applecare|account|login|sign/i.test(l.href);
             })
             .sort((a, b) => a.href.length - b.href.length)
             .map((l) => l.href);
