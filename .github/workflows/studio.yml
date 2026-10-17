@@ -58,6 +58,9 @@ jobs:
       DESCRIPTION_FOOTER: ${{ vars.DESCRIPTION_FOOTER }}
       PRODUCT_PHOTOS: ${{ vars.PRODUCT_PHOTOS }}
       OFFICIAL_MEDIA: ${{ vars.OFFICIAL_MEDIA }}
+      YOUTUBE_CLIPS: ${{ vars.YOUTUBE_CLIPS }}
+      YT_COOKIES: ${{ secrets.YT_COOKIES }}
+      YT_DEBUG: ${{ vars.YT_DEBUG || (inputs.action == 'photos' && '1' || '') }}
       CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
       CHANNEL_NICHE: ${{ vars.CHANNEL_NICHE }}
       CHANNEL_STYLE: ${{ vars.CHANNEL_STYLE }}
@@ -105,6 +108,8 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji > /dev/null
           npx playwright-core install --with-deps chromium > /dev/null
           npx remotion browser ensure
+          # yt-dlp: only used when YouTube clips are switched on (/ytclips on)
+          sudo curl -fsSL -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && sudo chmod +x /usr/local/bin/yt-dlp || echo "(yt-dlp not installed)"
 
       - name: Run "${{ env.ACTION }}"
         if: steps.gate.outputs.skip != 'true'

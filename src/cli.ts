@@ -2,6 +2,7 @@ import { OUT_DIR, config, requireKeys, saveEnv } from "./config.js";
 import { readState, writeState } from "./jobs.js";
 import { processInbox } from "./inbox.js";
 import { findOfficialMedia } from "./pipeline/official.js";
+import { youtubeClip } from "./pipeline/youtube.js";
 import { scoutTopics } from "./pipeline/trends.js";
 import { elevenLabsCredits } from "./pipeline/voice.js";
 import { makeDemo, makeShort, makeVideo, retryBusyJobs } from "./produce.js";
@@ -178,12 +179,27 @@ async function main() {
       }
       const clip = media.videos.length ? await downloadVideo(media.videos[0], dir) : null;
       if (clip) files.push(clip.file);
+      // Also test the official YouTube clip (works whether or not /ytclips is on), to see if YouTube allows it here.
+      let yt: string | null = null;
+      try {
+        const c = await youtubeClip(product, dir, 0);
+        if (c) {
+          files.push(c.file);
+          yt = `${c.title} (${c.source})`;
+        }
+      } catch (e) {
+        yt = `failed: ${(e as Error).message.split("\n").find((l) => /error/i.test(l)) ?? (e as Error).message.split("\n")[0]}`;
+      }
+      console.log(`  YouTube: ${yt ?? "no official video found"}`);
       console.log(`  ${files.length} files ready:\n${files.map((f) => `   ${path.basename(f)}`).join("\n")}`);
       for (const f of files) await uploadToRelease("photo-previews", "Photo previews", f).catch((e) => console.log(`  (upload: ${(e as Error).message})`));
       if (config.telegram.botToken && config.telegram.chatId) {
         await sendMessage(`🔎 <b>Official media for ${esc(product)}</b>\n${media.site ? `From ${esc(media.site)}` : "Nothing found on the maker's website."}`).catch(() => {});
         for (const f of files.filter((f) => /\.(png|jpg)$/.test(f))) await sendPhoto(f, esc(product)).catch(() => {});
         if (clip) await sendVideo(clip.file, `${esc(product)}: official clip`).catch(() => {});
+        const ytFile = files.find((f) => path.basename(f).startsWith("yt-"));
+        if (ytFile) await sendVideo(ytFile, `${esc(product)}: YouTube clip from ${esc(yt ?? "")}`).catch(() => {});
+        else await sendMessage(`🎞 YouTube clip test: ${esc(yt ?? "no official video found")}`).catch(() => {});
       }
       break;
     }

@@ -7,6 +7,7 @@ import { jobMediaDir } from "../jobs.js";
 import { ensureLocal, findInLibrary, type LibraryItem } from "../library.js";
 import type { FoundImage, Scene } from "../types.js";
 import { download, publicPath, run } from "./media.js";
+import { youtubeClip, youtubeClipsEnabled } from "./youtube.js";
 import { BROWSER_UA, MOBILE_UA, NAME_SHIM, findOfficialMedia, officialMediaEnabled, type OfficialMedia } from "./official.js";
 
 /** One downloadable stock clip, whichever library it came from. */
@@ -471,6 +472,8 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
     return { file: pick.file, credit: pick.credit };
   }
 
+  const ytCount = new Map<string, number>();
+  let ytFailed = false;
   console.log("📷 Finding official product photos and your own footage…");
   for (const scene of scenes) {
     const text = [scene.product, scene.heading, scene.broll_query, scene.narration].filter(Boolean).join(" ");
@@ -501,6 +504,22 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
         videos[scene.id] = { file: publicPath(got.file), duration: got.duration };
         credits.add(`${v.credit}: ${v.source}`);
         break;
+      }
+      // Optional (/ytclips on): a few muted seconds from the maker's own YouTube announcement video.
+      if (!videos[scene.id] && youtubeClipsEnabled() && !ytFailed) {
+        const nth = ytCount.get(scene.product) ?? 0;
+        ytCount.set(scene.product, nth + 1);
+        try {
+          const clip = await youtubeClip(scene.product, dir, nth);
+          if (clip) {
+            videos[scene.id] = { file: publicPath(clip.file), duration: clip.duration };
+            credits.add(`Footage: ${clip.credit}, "${clip.title}": ${clip.source}`);
+          }
+        } catch (e) {
+          // Usually YouTube's "confirm you're not a bot" check on cloud servers: stop trying for this video.
+          ytFailed = true;
+          console.log(`  ✗ YouTube clip: ${(e as Error).message.split("\n").find((l) => /error/i.test(l)) ?? (e as Error).message.split("\n")[0]}`);
+        }
       }
     }
     const photo = await nextPhoto(scene.product, text);

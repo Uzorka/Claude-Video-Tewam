@@ -1,5 +1,6 @@
 import os from "node:os";
 import path from "node:path";
+import { youtubeClipsEnabled } from "./pipeline/youtube.js";
 import { config, readSettings, updateSettings } from "./config.js";
 import { DEFAULT_KOKORO_VOICE, KOKORO_VOICES } from "./pipeline/kokoro.js";
 import { addToLibrary, loadLibrary, parseTags } from "./library.js";
@@ -28,6 +29,7 @@ Commands:
 • <code>/demo</code> – a short sample video to check the style and voice
 • <code>/voices</code> – list voices, then <code>/voice ID</code> to switch
 • <code>/library</code> – your own photos and clips
+• <code>/ytclips on</code> / <code>off</code> – short muted clips from the maker's official YouTube channel in product scenes (off by default; copyright risk)
 
 📷 <b>Your own footage:</b> send me photos or short videos with a caption saying what they show, e.g. <i>iphone 18, unboxing</i>. Whenever a video talks about that, I'll use your shots first.`;
 
@@ -120,6 +122,21 @@ export async function processInbox({ quiet = false } = {}) {
           `📚 <b>Your library</b>: ${items.filter((i) => i.type === "photo").length} photos, ${items.filter((i) => i.type === "video").length} clips\n\n${[...byTag]
             .map(([t, n]) => `• ${esc(t)} (${n})`)
             .join("\n")}`,
+        );
+      });
+    } else if (/^\/ytclips\b/i.test(text)) {
+      const want = /\bon\b/i.test(text) ? true : /\boff\b/i.test(text) ? false : null;
+      tasks.push(async () => {
+        if (want === null) {
+          return void (await sendMessage(`🎞 YouTube clips are <b>${youtubeClipsEnabled() ? "on" : "off"}</b>. Send <code>/ytclips on</code> or <code>/ytclips off</code>.`));
+        }
+        updateSettings({ ytClips: want });
+        await sendMessage(
+          want
+            ? `🎞 <b>YouTube clips: on.</b> Product scenes will use a few muted seconds from the maker's own YouTube channel (e.g. Apple's announcement videos), credited in the description.
+
+⚠️ That footage belongs to the maker. Short muted clips with your commentary are common on tech channels, but YouTube's Content ID can still flag a video (earnings go to the owner, or it's blocked in some countries). YouTube blocks downloads from the cloud computer unless it's signed in: see "YouTube clips" in SETUP.md to add the <code>YT_COOKIES</code> secret from a spare YouTube account. Until then, product scenes fall back to photos. Send <code>/ytclips off</code> any time.`
+            : "🎞 YouTube clips: off. Product scenes use official photos, press clips and your own footage.",
         );
       });
     } else if (/^\/voices\b/i.test(text)) {
