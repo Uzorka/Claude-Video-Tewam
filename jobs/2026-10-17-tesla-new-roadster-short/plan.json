@@ -1,0 +1,195 @@
+{
+  "title": "Tesla Roadster: 0-60 in 0.81s and it FLIES?!",
+  "alt_titles": [
+    "The New Tesla Roadster Actually Flies",
+    "Tesla Roadster Just Did a Mid-Air Kickflip",
+    "0-60 in 0.81s: Tesla Roadster Revealed"
+  ],
+  "thumbnail_text": "IT ACTUALLY FLIES",
+  "description": "Tesla unveiled the redesigned next-gen Roadster with SpaceX thrusters, suction fans, and a 0.81s zero-to-sixty time. But with a halved range and deliveries pushed to 2028, is it real or pure theater? #tesla #roadster #elonmusk #supercars #ev #tech",
+  "tags": [
+    "tesla roadster",
+    "tesla",
+    "elon musk",
+    "spacex",
+    "electric car",
+    "supercar",
+    "tech shorts"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Tesla just showed off a car that hits zero to sixty in 0.81 seconds, drives completely upside down, and kickflips mid-air.",
+      "kind": "stat",
+      "broll_query": "supercar accelerating fast track",
+      "heading": "Zero To Sixty",
+      "subheading": "Demonstrated Acceleration",
+      "stat_value": "0.81s",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "reveal",
+      "narration": "This is the next-gen Roadster, turning science fiction into an actual drivable stunt machine.",
+      "kind": "product",
+      "broll_query": null,
+      "heading": "Next-Gen Roadster",
+      "subheading": "Halo Supercar",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Tesla Roadster"
+    },
+    {
+      "id": "thrusters",
+      "narration": "It uses ten SpaceX cold-gas thrusters running on pure compressed air to launch itself off the ground.",
+      "kind": "process",
+      "broll_query": "rocket launch smoke exhaust",
+      "heading": "Cold-Gas Thrusters",
+      "subheading": "SpaceX Hardware",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "💨",
+          "label": "Air Tanks"
+        },
+        {
+          "icon": "🚀",
+          "label": "Cold-Gas Thrusters"
+        },
+        {
+          "icon": "🏎️",
+          "label": "Mid-Air Hop"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "aero",
+      "narration": "Beneath the floor, four high-powered suction fans pull forty-seven hundred kilograms of downforce to stick it to the ceiling.",
+      "kind": "specs",
+      "broll_query": "wind tunnel car aerodynamics",
+      "heading": "Suction Downforce",
+      "subheading": "Extreme Aero Specs",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": [
+        {
+          "label": "Downforce",
+          "value": "4,700 kg"
+        },
+        {
+          "label": "Fan Power",
+          "value": "80 kW"
+        },
+        {
+          "label": "Cornering",
+          "value": "2+ Gs"
+        },
+        {
+          "label": "Top Speed",
+          "value": "230+ mph"
+        }
+      ],
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "tradeoff",
+      "narration": "The catch? Tesla slashed its original 620-mile battery range in half, down to around 310 miles.",
+      "kind": "compare",
+      "broll_query": "electric car battery charging",
+      "heading": "The Range Cut",
+      "subheading": "Promise vs Reality",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "2017 Promise",
+        "points": [
+          "620 mi range",
+          "Grand touring"
+        ]
+      },
+      "right": {
+        "label": "2026 Reality",
+        "points": [
+          "310 mi range",
+          "Track stunts"
+        ]
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "delays",
+      "narration": "Plus, the flying Rocket trim is strictly invite-only, and deliveries are pushed to 2028.",
+      "kind": "timeline",
+      "broll_query": "calendar clock time lapse",
+      "heading": "Delayed To 2028",
+      "subheading": "Delivery Roadmap",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": [
+        {
+          "date": "2017",
+          "label": "First Unveiled"
+        },
+        {
+          "date": "2020",
+          "label": "Original Target"
+        },
+        {
+          "date": "2028",
+          "label": "Production Target"
+        }
+      ],
+      "product": null
+    },
+    {
+      "id": "verdict",
+      "narration": "It is an incredible engineering flex, but until it hits driveways, it is mostly expensive theater. Follow for more.",
+      "kind": "title",
+      "broll_query": "night city skyline highway",
+      "heading": "Engineering Theater",
+      "subheading": "Expensive PR Flex",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "id": "2026-10-17-tesla-new-roadster-short",
+  "createdAt": "2026-10-17T18:38:30.115Z",
+  "updatedAt": "2026-10-17T18:50:19.239Z",
+  "status": "in_review",
+  "topic": {
+    "title": "tesla new roadster (short)",
+    "angle": "As requested by the channel owner.",
+    "why_now": "Requested directly by the channel owner.",
+    "score": 100,
+    "source_urls": []
+  },
+  "version": 1,
+  "feedback": [],
+  "reviewMessageIds": [
+    86,
+    87
+  ],
+  "releaseTag": "video-2026-10-17-tesla-new-roadster-short-v1",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-17-tesla-new-roadster-short-v1/2026-10-17-tesla-new-roadster-short-v1.mp4",
+  "youtubeId": null,
+  "error": null,
+  "format": "vertical",
+  "sourceJobId": "2026-10-17-tesla-new-roadster-2"
+}
