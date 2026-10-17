@@ -3,7 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { ROOT, config } from "../config.js";
 import { jobMediaDir } from "../jobs.js";
-import { LIBRARY_DIR, findInLibrary } from "../library.js";
+import { ensureLocal, findInLibrary, type LibraryItem } from "../library.js";
 import type { FoundImage, Scene } from "../types.js";
 import { download, publicPath, run } from "./media.js";
 
@@ -202,9 +202,9 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
   const usedLibrary = new Set<string>();
   const usedImages = new Set<string>();
   const wikiCache = new Map<string, FoundImage[]>();
-  const library = (item: { file: string }) => {
+  const library = async (item: LibraryItem) => {
     const dest = path.join(dir, item.file);
-    if (!fs.existsSync(dest)) fs.copyFileSync(path.join(LIBRARY_DIR, item.file), dest);
+    if (!fs.existsSync(dest)) fs.copyFileSync(await ensureLocal(item), dest);
     return publicPath(dest);
   };
 
@@ -216,15 +216,23 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
     const clip = findInLibrary(text, "video", usedLibrary);
     if (clip) {
       usedLibrary.add(clip.file);
-      videos[scene.id] = { file: library(clip), duration: clip.duration ?? 5 };
+      try {
+        videos[scene.id] = { file: await library(clip), duration: clip.duration ?? 5 };
+      } catch (e) {
+        console.log(`  ✗ ${(e as Error).message}`);
+      }
     }
 
     if (scene.kind !== "product" && !(scene.kind === "broll" && scene.product)) continue;
     const own = findInLibrary(text, "photo", usedLibrary);
     if (own) {
       usedLibrary.add(own.file);
-      photos[scene.id] = { file: library(own), credit: null };
-      continue;
+      try {
+        photos[scene.id] = { file: await library(own), credit: null };
+        continue;
+      } catch (e) {
+        console.log(`  ✗ ${(e as Error).message}`);
+      }
     }
     if (!scene.product) continue;
     if (!wikiCache.has(scene.product)) wikiCache.set(scene.product, await wikimediaImages(scene.product).catch(() => []));

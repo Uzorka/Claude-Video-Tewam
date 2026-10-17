@@ -192,7 +192,7 @@ async function failJob(job: Job, e: unknown) {
   job.status = "failed";
   job.error = message;
   saveJob(job);
-  const willRetry = AUTO_RETRY.test(message) && process.env.STUDIO_SERVE === "1" && (job.autoRetries ?? 0) < MAX_AUTO_RETRIES;
+  const willRetry = AUTO_RETRY.test(message) && process.env.STUDIO_AUTO_RETRY === "1" && (job.autoRetries ?? 0) < MAX_AUTO_RETRIES;
   const ids = await sendMessage(
     `⚠️ Something went wrong on <b>${esc(job.topic.title)}</b>:\n<code>${esc(message.slice(0, 500))}</code>\n\n${
       willRetry ? "⏳ I'll try again by myself in about 15 minutes. You can also reply <code>retry</code> to try now." : "Reply <code>retry</code> to this message to try again."
@@ -207,7 +207,7 @@ const AUTO_RETRY = /busy|high demand|overloaded|rate.?limit|quota|503|429|ETIMED
 const MAX_AUTO_RETRIES = 3;
 const RETRY_AFTER_MS = 15 * 60 * 1000;
 
-/** Laptop mode: quietly retry videos that failed only because a service was busy. */
+/** Quietly retry videos that failed only because a service was busy (laptop serve mode and cloud runs). */
 export async function retryBusyJobs() {
   for (const job of listJobs()) {
     if (job.status !== "failed" || !AUTO_RETRY.test(job.error ?? "")) continue;

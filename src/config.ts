@@ -61,6 +61,34 @@ export const config = {
   browserPath: env("BROWSER_EXECUTABLE"),
 };
 
+/**
+ * Settings changed from Telegram (voice, which chat owns the bot) live in state/settings.json,
+ * so they survive both laptop restarts and cloud runs (the workflow saves state/ to git).
+ */
+export type StudioSettings = { voiceId?: string; ownerChatId?: string };
+const SETTINGS_FILE = path.join(STATE_DIR, "settings.json");
+
+export function readSettings(): StudioSettings {
+  try {
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8")) as StudioSettings;
+  } catch {
+    return {};
+  }
+}
+
+export function updateSettings(patch: StudioSettings) {
+  fs.mkdirSync(STATE_DIR, { recursive: true });
+  fs.writeFileSync(SETTINGS_FILE, JSON.stringify({ ...readSettings(), ...patch }, null, 2) + "\n");
+  if (patch.voiceId) config.elevenlabs.voiceId = patch.voiceId;
+  if (patch.ownerChatId && !config.telegram.chatId) config.telegram.chatId = patch.ownerChatId;
+}
+
+{
+  const saved = readSettings();
+  if (saved.voiceId) config.elevenlabs.voiceId = saved.voiceId;
+  if (!config.telegram.chatId && saved.ownerChatId) config.telegram.chatId = saved.ownerChatId;
+}
+
 export function requireKeys(...names: string[]) {
   const missing = names.filter((n) => !(process.env[n] ?? "").trim());
   if (missing.length) {

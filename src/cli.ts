@@ -25,7 +25,7 @@ async function check() {
   row(Boolean(config.elevenlabs.apiKey && config.elevenlabs.voiceId), "Voice (ELEVENLABS_API_KEY + ELEVENLABS_VOICE_ID)", "required for real voice-over");
   row(Boolean(config.pixabay.apiKey || config.pexels.apiKey), "Stock footage (PIXABAY_API_KEY or PEXELS_API_KEY)", "strongly recommended");
   row(Boolean(config.telegram.botToken), "Telegram bot (TELEGRAM_BOT_TOKEN)", "required for review links");
-  row(Boolean(config.telegram.chatId), "Your Telegram chat (TELEGRAM_CHAT_ID)", "see below");
+  row(Boolean(config.telegram.chatId), "Your Telegram chat", "send your bot any message; it connects automatically");
   row(Boolean(config.youtube.apiKey), "YouTube trending data (YOUTUBE_API_KEY)", "optional");
   row(config.youtube.publishMode === "manual" || Boolean(config.youtube.refreshToken), `Publishing mode: ${config.youtube.publishMode}`, "api mode needs YOUTUBE_CLIENT_ID/SECRET/REFRESH_TOKEN");
 
@@ -113,7 +113,7 @@ async function serve() {
   console.log("🎬 Your studio is running. Leave this window open (closing it stops the studio).");
   console.log("   Talk to it from Telegram. Press Ctrl+C here to stop.\n");
   await sendMessage("🟢 Studio is online. Send /topics to see what's trending, or /new your topic to make a video.");
-  process.env.STUDIO_SERVE = "1";
+  process.env.STUDIO_AUTO_RETRY = "1";
   for (;;) {
     try {
       await processInbox({ quiet: true });
@@ -150,6 +150,7 @@ async function main() {
     }
     case "inbox":
       await processInbox();
+      await retryBusyJobs();
       break;
     case "demo": {
       const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Testing the studio", score: 0, source_urls: [] });

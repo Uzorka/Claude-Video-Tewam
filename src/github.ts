@@ -38,3 +38,15 @@ export async function untar(file: string, destParent: string) {
   fs.mkdirSync(destParent, { recursive: true });
   await run("tar", ["-xzf", file, "-C", destParent]);
 }
+
+/** Add (or replace) a file on a long-lived release, creating the release the first time. */
+export async function uploadToRelease(tag: string, title: string, file: string) {
+  if (!releasesEnabled()) return false;
+  try {
+    await gh(["release", "view", tag]);
+  } catch {
+    await gh(["release", "create", tag, "--title", title, "--notes", "Files the studio keeps between cloud runs."]);
+  }
+  await gh(["release", "upload", tag, file, "--clobber"]);
+  return true;
+}

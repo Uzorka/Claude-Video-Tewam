@@ -3,6 +3,18 @@
 Follow these steps **in order**. Each step says exactly where to click and what to copy.
 Whenever you see **📋 Save this**, paste the value into a private note on your phone. You will need it in Step 7.
 
+## ☁️ Cloud mode (laptop can stay off)
+
+Once GitHub Actions works on your account, the studio runs on GitHub's computers:
+
+- Every 10 minutes it checks Telegram. If you've sent something, it gets to work (a video takes about 20–40 minutes in the cloud).
+- **Your chat connects automatically:** the first message you send the bot claims it. No `TELEGRAM_CHAT_ID` needed.
+- Your voice choice (`/voice`) and your footage library are saved in GitHub, so nothing lives on the laptop.
+- Failed videos (for example when Gemini is busy) are retried automatically every 15 minutes, up to 3 times.
+- **Don't run `npm run serve` on the laptop at the same time.** Both would answer the same Telegram messages. Pick one.
+
+---
+
 ## 💻 Run it on your Ubuntu laptop (no GitHub Actions needed)
 
 Use this if GitHub Actions isn't available on your account, or you simply prefer your own computer.
