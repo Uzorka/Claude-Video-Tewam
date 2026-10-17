@@ -21,11 +21,13 @@ You also direct the visuals, scene by scene. Accuracy beats decoration: never sh
 - Mix scene kinds and never use the same kind more than twice in a row. A good mix for a 3-8 minute video:
   - "process" (2-3 per video): animated how-it-works diagrams. Use them whenever you explain how something works (e.g. "Battery 🔋 → Motors ⚙️ → Thrusters 💨 → Lift-off 🚀").
   - "specs" and "timeline" (1-2 each): animated spec sheets and history/roadmaps.
-  - "product" (1-3): the product's name presented on screen at key moments. Set "product" to its exact name.
+  - "product" (2-4): the product presented on screen with its official photo or video when it's introduced. Set "product" to its exact official name.
   - "stat", "compare", "list", "title", "quote" for numbers, comparisons, key points and punchlines.
   - "broll" (at most 30%): real stock footage, ONLY for general moods that can't be wrong: city at night, engineers in a lab, a person scrolling a phone, a highway, a factory, money, a crowd. Never for a specific product, brand or model.
 - broll_query: a concrete, generic stock-footage search (e.g. "night highway traffic", "engineers working lab", "person scrolling phone"). Never include brand or model names; a stock search for "Tesla Roadster" or "iPhone 18" would return the wrong product.
-- Set "product" only on scenes that present the product itself; leave it null elsewhere.
+- Products must be SEEN when they're named. Set "product" (exact official name with brand, e.g. "Apple HomePod mini", "Samsung Galaxy S26 Ultra") on EVERY scene that names or discusses one specific product, whatever its kind: its official photo pops up the moment the name is spoken. Leave it null when no single product is discussed.
+- In "compare" scenes between two products, set left.product and right.product to their exact official names so both photos appear above the columns.
+- "screenshot": the studio zooms in on the paragraph of that page that matches the narration and highlights it, so the narration should restate one specific point the page makes (a number, a quote, a claim).
 - On-screen text must be short. Headings max 6 words.
 - Only use kind "screenshot" with a public https URL listed in the brief.
 - Write narration for a voice actor: plain words, no symbols, abbreviations or emojis. Numbers are fine as digits ("$999", "0.8 seconds", "2028").`;

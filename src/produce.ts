@@ -38,7 +38,7 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
   // Stock footage only for general mood shots: a stock search for a specific product returns the wrong one.
   const stock = await fetchBroll(job.id, plan.scenes.filter((s) => !real.videos[s.id] && !s.product), durations);
   const broll = { ...stock, ...real.videos };
-  const shots = await captureScreenshots(job.id, plan.scenes);
+  const shots = await captureScreenshots(job.id, plan.scenes, job.format === "vertical");
   saveText(job.id, "credits.txt", real.credits.join("\n"));
 
   const scenes: RenderScene[] = plan.scenes.map((s) => {
@@ -57,7 +57,10 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
       words: voice[s.id].words,
       broll: broll[s.id]?.file ?? null,
       brollDuration: broll[s.id]?.duration ?? null,
-      image: shots[s.id] ?? null,
+      image: shots[s.id]?.file ?? null,
+      imageFocus: shots[s.id]?.focus ?? null,
+      imageHost: shots[s.id]?.host ?? null,
+      sidePhotos: real.sidePhotos[s.id] ?? null,
       photo: real.photos[s.id]?.file ?? null,
       photoCredit: real.photos[s.id]?.credit ?? null,
     };

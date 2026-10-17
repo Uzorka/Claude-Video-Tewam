@@ -239,7 +239,10 @@ When you reply `approve`, the bot sends: the thumbnail, a full-quality download 
 
 The studio adds real visuals in two ways:
 
-1. **Automatically:** for scenes about a specific product, it uses freely licensed photos from **Wikimedia Commons**, then the main image of the news articles it researched. Photographers and sites are credited in the video and in the description. Article images belong to their publishers, so check them before you publish.
+1. **Automatically, from the maker's own website:** whenever a scene names a product (e.g. *Apple HomePod*), the studio opens the maker's official product page and newsroom (apple.com, samsung.com, store.google.com…) and takes their official photos and video clips. The photo pops up **the moment the name is said**, with the name under it, so viewers connect the name to the product. Product scenes use the official video clip when there is one, and comparisons show both products above their columns. Companies publish these images for news coverage and reviews; the company is credited in the video and in the description.
+   - Test it any time: **Actions → 🎬 Media Studio → Run workflow → photos**, and type a product in "topic". The bot sends you what it found.
+   - To switch it off, add the repository variable `OFFICIAL_MEDIA` = `off`.
+   - News-site photos and Wikimedia stay off (they're often the wrong model). Add the variable `PRODUCT_PHOTOS` = `on` to allow them as a last resort.
 2. **Your own shots (best for growing a real channel):** in Telegram, send the bot photos or short videos (under 20 MB) with a **caption** saying what they show, for example:
    - `iphone 18, unboxing`
    - `galaxy s26 camera`

@@ -1,6 +1,7 @@
 import { config, requireKeys, saveEnv } from "./config.js";
 import { readState, writeState } from "./jobs.js";
 import { processInbox } from "./inbox.js";
+import { findOfficialMedia } from "./pipeline/official.js";
 import { scoutTopics } from "./pipeline/trends.js";
 import { elevenLabsCredits } from "./pipeline/voice.js";
 import { makeDemo, makeShort, makeVideo, retryBusyJobs } from "./produce.js";
@@ -160,6 +161,17 @@ async function main() {
     case "demo":
       await makeDemo();
       break;
+    case "photos": {
+      // Preview which official photos and videos the studio finds for a product.
+      const product = arg("topic") || "Apple HomePod";
+      const media = await findOfficialMedia(product);
+      for (const m of [...media.images, ...media.videos]) console.log(`  ${m.url}  (${m.title ?? ""})`);
+      if (config.telegram.botToken && config.telegram.chatId) {
+        const list = [...media.images.map((m) => `🖼 ${m.url}`), ...media.videos.map((m) => `🎞 ${m.url}`)].slice(0, 9);
+        await sendMessage(`🔎 <b>Official media for ${esc(product)}</b>\n${media.site ? `From ${esc(media.site)}\n\n` : ""}${list.length ? esc(list.join("\n")) : "Nothing found."}`).catch(() => {});
+      }
+      break;
+    }
     case "short": {
       // A vertical short of your topic, or of the latest finished video.
       const custom = arg("topic");

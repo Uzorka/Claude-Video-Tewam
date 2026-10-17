@@ -19,6 +19,9 @@ const sample: RenderProps = {
     photo: null,
     photoCredit: null,
     image: null,
+    imageFocus: null,
+    imageHost: null,
+    sidePhotos: null,
     words: s.narration.split(" ").map((word, i) => ({ word, start: i * 0.35, end: i * 0.35 + 0.3 })),
   })),
 };

@@ -12,13 +12,19 @@ export type Topic = z.infer<typeof TopicSchema>;
 
 export const VISUAL_KINDS = ["broll", "product", "process", "specs", "timeline", "title", "stat", "list", "compare", "quote", "screenshot"] as const;
 
+const CompareProduct = z
+  .string()
+  .nullable()
+  .optional()
+  .describe("When this column is a specific product: its exact official name, e.g. 'Apple HomePod mini' (its official photo is shown above the column). Otherwise null.");
+
 export const SceneSchema = z.object({
   id: z.string().describe("Short slug, unique within the video, e.g. 'hook' or 'price'"),
   narration: z
     .string()
     .describe("Exactly what the voice says in this scene. Spoken English, 1-4 sentences."),
   kind: z.enum(VISUAL_KINDS).describe(
-    "broll = full-screen stock video of a GENERAL scene (never a specific product); product = the product's name presented on screen (with the owner's own photo if one exists); process = animated how-it-works diagram of 2-5 steps; specs = animated spec sheet; timeline = animated timeline of dated events; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = scrolling capture of a public web page",
+    "broll = full-screen stock video of a GENERAL scene (never a specific product); product = the product's name presented on screen (with the owner's own photo if one exists); process = animated how-it-works diagram of 2-5 steps; specs = animated spec sheet; timeline = animated timeline of dated events; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = close-up of the paragraph on a public web page that backs up what's being said, highlighted",
   ),
   broll_query: z
     .string()
@@ -35,11 +41,11 @@ export const SceneSchema = z.object({
   stat_value: z.string().nullable().describe("For kind=stat: the number, e.g. '$999' or '3.5x'"),
   items: z.array(z.string()).nullable().describe("For kind=list: 2-5 short bullet points"),
   left: z
-    .object({ label: z.string(), points: z.array(z.string()) })
+    .object({ label: z.string(), points: z.array(z.string()), product: CompareProduct })
     .nullable()
     .describe("For kind=compare: left column"),
   right: z
-    .object({ label: z.string(), points: z.array(z.string()) })
+    .object({ label: z.string(), points: z.array(z.string()), product: CompareProduct })
     .nullable()
     .describe("For kind=compare: right column"),
   url: z.string().nullable().describe("For kind=screenshot: a public https URL to capture"),
@@ -58,7 +64,9 @@ export const SceneSchema = z.object({
   product: z
     .string()
     .nullable()
-    .describe("The exact product this scene shows, e.g. 'iPhone 18 Pro'. Required for kind=product; null for scenes that don't show the product itself."),
+    .describe(
+      "The exact official name (with brand) of the ONE product this scene talks about, e.g. 'Apple HomePod mini' or 'Samsung Galaxy S26 Ultra'. Its official photo pops up when the name is said, so set it on EVERY scene (any kind) that names or discusses a specific product. Required for kind=product. Null when no single product is discussed.",
+    ),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 
@@ -82,6 +90,11 @@ export type RenderScene = Scene & {
   broll: string | null; // video path relative to public/
   brollDuration: number | null; // seconds of footage available
   image: string | null; // screenshot path relative to public/
+  /** Where the matching passage sits in the screenshot (fractions 0-1), to zoom in and highlight it. */
+  imageFocus: { x: number; y: number; w: number; h: number; aspect: number } | null;
+  imageHost: string | null;
+  /** Official photos above the two columns of a product comparison. */
+  sidePhotos: { left: string | null; right: string | null } | null;
   photo: string | null; // real product photo path relative to public/
   photoCredit: string | null;
 };
