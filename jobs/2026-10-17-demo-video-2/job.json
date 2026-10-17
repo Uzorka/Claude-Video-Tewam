@@ -1,0 +1,24 @@
+{
+  "id": "2026-10-17-demo-video-2",
+  "createdAt": "2026-10-17T15:20:21.169Z",
+  "updatedAt": "2026-10-17T15:25:43.735Z",
+  "status": "in_review",
+  "topic": {
+    "title": "Demo video",
+    "angle": "Style preview",
+    "why_now": "Testing the studio",
+    "score": 0,
+    "source_urls": []
+  },
+  "version": 1,
+  "feedback": [],
+  "reviewMessageIds": [
+    63,
+    64
+  ],
+  "releaseTag": "video-2026-10-17-demo-video-2-v1",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-17-demo-video-2-v1/2026-10-17-demo-video-2-v1.mp4",
+  "youtubeId": null,
+  "error": null,
+  "demo": true
+}

@@ -27,6 +27,7 @@
     "@remotion/renderer": "4.0.536",
     "dotenv": "^17.2.0",
     "googleapis": "^160.0.0",
+    "kokoro-js": "^1.2.1",
     "playwright-core": "^1.55.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
