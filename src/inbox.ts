@@ -1,6 +1,7 @@
 import os from "node:os";
 import path from "node:path";
-import { config, updateSettings } from "./config.js";
+import { config, readSettings, updateSettings } from "./config.js";
+import { DEFAULT_KOKORO_VOICE, KOKORO_VOICES } from "./pipeline/kokoro.js";
 import { addToLibrary, loadLibrary, parseTags } from "./library.js";
 import { listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
@@ -121,22 +122,32 @@ export async function processInbox({ quiet = false } = {}) {
       });
     } else if (/^\/voices\b/i.test(text)) {
       tasks.push(async () => {
-        const voices = await listVoices();
-        const premade = voices.filter((v) => v.category === "premade");
-        const other = voices.filter((v) => v.category !== "premade");
+        const settings = readSettings();
+        const current = settings.voiceEngine === "kokoro" ? `Kokoro ${settings.kokoroVoice ?? DEFAULT_KOKORO_VOICE}` : `ElevenLabs ${config.elevenlabs.voiceId || "none"} (switches to free Kokoro when credits run out)`;
+        let eleven = "";
+        try {
+          const premade = (await listVoices()).filter((v) => v.category === "premade");
+          eleven = premade.map((v) => `• ${esc(v.name)}\n<code>${v.voice_id}</code>`).join("\n");
+        } catch {
+          eleven = "<i>(couldn't load ElevenLabs voices)</i>";
+        }
         await sendMessage(
-          `🎙️ <b>Voices you can use on the free plan</b> (tap an ID to copy it):\n\n${premade
-            .map((v) => `• ${esc(v.name)}\n<code>${v.voice_id}</code>`)
-            .join("\n")}${other.length ? `\n\n<i>Voices marked cloned/professional/library need a paid plan.</i>` : ""}\n\nThen send: <code>/voice ID</code>\nCurrent voice: <code>${esc(config.elevenlabs.voiceId || "none")}</code>`,
+          `🎙️ <b>Free Kokoro voices</b> (unlimited, no credits):\n${Object.entries(KOKORO_VOICES)
+            .map(([id, name]) => `• ${esc(name)}\n<code>${id}</code>`)
+            .join("\n")}\n\n🎙️ <b>ElevenLabs voices</b> (most natural, uses your monthly credits):\n${eleven}\n\nTap an ID to copy it, then send <code>/voice ID</code>\nNow using: <code>${esc(current)}</code>`,
         );
       });
     } else if (/^\/voice\s+\S+/i.test(text)) {
       const id = text.split(/\s+/)[1];
       tasks.push(async () => {
+        if (KOKORO_VOICES[id]) {
+          updateSettings({ voiceEngine: "kokoro", kokoroVoice: id });
+          return void (await sendMessage(`✅ Now using the free Kokoro voice <b>${esc(KOKORO_VOICES[id])}</b> for every video. Send /demo to hear it.`));
+        }
         const voice = (await listVoices()).find((v) => v.voice_id === id);
-        if (!voice) return void (await sendMessage("I couldn't find that voice ID on your ElevenLabs account. Send /voices to see the list."));
-        updateSettings({ voiceId: id });
-        await sendMessage(`✅ Voice changed to <b>${esc(voice.name)}</b>. Send /demo to hear it.`);
+        if (!voice) return void (await sendMessage("I couldn't find that voice. Send /voices to see the list."));
+        updateSettings({ voiceId: id, voiceEngine: "auto" });
+        await sendMessage(`✅ Voice changed to <b>${esc(voice.name)}</b> (ElevenLabs). If credits run out I'll use the free Kokoro voice. Send /demo to hear it.`);
       });
     } else if (!msg.reply_to_message && /^(hi|hello|hey|yo|hiya|thanks|thank you|ok|okay|cool|nice|good (morning|afternoon|evening))[!. ]*$/i.test(text)) {
       tasks.push(() => sendMessage("👋 Hi! I'm here. Send /new followed by a topic to make a video, or /help to see everything I can do."));

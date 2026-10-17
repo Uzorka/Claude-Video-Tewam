@@ -1,11 +1,12 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { config, updateSettings } from "../config.js";
-import { sendMessage } from "../telegram.js";
+import { config, readSettings, updateSettings } from "../config.js";
+import { DEFAULT_KOKORO_VOICE, kokoroSpeak } from "./kokoro.js";
+import { esc, sendMessage } from "../telegram.js";
 import { jobMediaDir } from "../jobs.js";
 import type { Scene, WordTiming } from "../types.js";
-import { probeDuration, publicPath, run } from "./media.js";
+import { probeDuration, publicPath } from "./media.js";
 
 /** Turn ElevenLabs' error reply into a clear message (it uses 401 for several different problems). */
 function elevenLabsError(status: number, body: string): Error {
@@ -17,9 +18,9 @@ function elevenLabsError(status: number, body: string): Error {
     detail = body;
   }
   if (status === 402 || /paid_plan_required|payment_required/.test(body)) return new PaidVoiceError();
-  if (/quota_exceeded/.test(body)) return new Error("Your ElevenLabs credits for this month are used up. They reset monthly, or you can upgrade your plan.");
+  if (/quota_exceeded/.test(body)) return new ElevenLabsUnavailable("Your ElevenLabs credits for this month are used up. They reset monthly, or you can upgrade your plan.");
   if (/unusual_activity|detected_unusual/.test(body))
-    return new Error(
+    return new ElevenLabsUnavailable(
       "ElevenLabs blocked its free plan from this computer ('unusual activity'). The free plan often refuses cloud servers like GitHub and VPNs. Fix: make videos from your laptop, or upgrade ElevenLabs to Starter (about $5/month).",
     );
   if (/invalid_api_key|api.key/i.test(detail)) return new Error("ElevenLabs says the API key is invalid. Check ELEVENLABS_API_KEY.");
@@ -46,6 +47,9 @@ export async function elevenLabsCredits(): Promise<Credits> {
 
 /** A premade ElevenLabs voice ("Brian") that works on the free plan. */
 const FREE_FALLBACK_VOICE = "nPczCjzI2devNBz1zQrb";
+
+/** ElevenLabs can't be used right now (credits used up, or free plan blocked on this server). */
+class ElevenLabsUnavailable extends Error {}
 
 class PaidVoiceError extends Error {
   constructor() {
@@ -108,32 +112,23 @@ async function elevenLabs(text: string, previous: string, next: string, outFile:
   }
 }
 
-/** Silent placeholder voice so the pipeline can be tested without an ElevenLabs key. */
-async function placeholder(text: string, outFile: string): Promise<WordTiming[]> {
-  const tokens = text.split(/\s+/).filter(Boolean);
-  const perWord = 0.38;
-  const duration = Math.max(2, tokens.length * perWord);
-  await run("ffmpeg", ["-y", "-f", "lavfi", "-i", "anullsrc=r=44100:cl=stereo", "-t", duration.toFixed(2), "-q:a", "9", outFile]);
-  return tokens.map((word, i) => ({ word, start: i * perWord, end: (i + 1) * perWord - 0.04 }));
-}
-
 /**
  * Voice every scene. Clips are cached by (voice, model, text), so on a revision only
  * the scenes whose narration changed are re-recorded.
  */
-export async function voiceScenes(jobId: string, scenes: Scene[]): Promise<Record<string, VoiceClip>> {
-  const useReal = Boolean(config.elevenlabs.apiKey && config.elevenlabs.voiceId);
-  console.log(useReal ? "🎙️  Recording voice-over (ElevenLabs)…" : "🎙️  No ElevenLabs key: using a silent placeholder voice.");
+export async function voiceScenes(jobId: string, scenes: Scene[], engine?: "elevenlabs" | "kokoro"): Promise<Record<string, VoiceClip>> {
+  const settings = readSettings();
+  const kokoroVoice = settings.kokoroVoice ?? DEFAULT_KOKORO_VOICE;
+  const hasEleven = Boolean(config.elevenlabs.apiKey && config.elevenlabs.voiceId);
+  engine ??= settings.voiceEngine === "kokoro" || !hasEleven ? "kokoro" : "elevenlabs";
+  console.log(engine === "elevenlabs" ? "🎙️  Recording voice-over (ElevenLabs)…" : `🎙️  Recording voice-over (free Kokoro voice: ${kokoroVoice})…`);
   const dir = path.join(jobMediaDir(jobId), "voice");
   fs.mkdirSync(dir, { recursive: true });
 
   const clips: Record<string, VoiceClip> = {};
   for (const [i, scene] of scenes.entries()) {
-    const key = crypto
-      .createHash("sha1")
-      .update([useReal ? config.elevenlabs.voiceId : "placeholder", config.elevenlabs.model, scene.narration].join("|"))
-      .digest("hex")
-      .slice(0, 16);
+    const voiceKey = engine === "elevenlabs" ? `${config.elevenlabs.voiceId}|${config.elevenlabs.model}` : `kokoro|${kokoroVoice}`;
+    const key = crypto.createHash("sha1").update(`${voiceKey}|${scene.narration}`).digest("hex").slice(0, 16);
     const file = path.join(dir, `${key}.mp3`);
     const meta = path.join(dir, `${key}.json`);
     let words: WordTiming[];
@@ -141,15 +136,23 @@ export async function voiceScenes(jobId: string, scenes: Scene[]): Promise<Recor
       words = JSON.parse(fs.readFileSync(meta, "utf8"));
     } else {
       try {
-        words = useReal
-          ? await elevenLabs(scene.narration, scenes[i - 1]?.narration ?? "", scenes[i + 1]?.narration ?? "", file)
-          : await placeholder(scene.narration, file);
+        words =
+          engine === "elevenlabs"
+            ? await elevenLabs(scene.narration, scenes[i - 1]?.narration ?? "", scenes[i + 1]?.narration ?? "", file)
+            : await kokoroSpeak(scene.narration, kokoroVoice, file);
       } catch (e) {
-        // The chosen voice needs a paid plan: switch to a free premade voice once and start over.
-        if (!(e instanceof PaidVoiceError) || config.elevenlabs.voiceId === FREE_FALLBACK_VOICE) throw e;
-        updateSettings({ voiceId: FREE_FALLBACK_VOICE });
-        await sendMessage("🎙️ Your saved voice needs a paid ElevenLabs plan, so I switched to <b>Brian</b> (free). Send /voices to pick another.").catch(() => {});
-        return voiceScenes(jobId, scenes);
+        if (e instanceof PaidVoiceError && config.elevenlabs.voiceId !== FREE_FALLBACK_VOICE) {
+          // The chosen voice needs a paid plan: switch to a free premade voice once and start over.
+          updateSettings({ voiceId: FREE_FALLBACK_VOICE });
+          await sendMessage("🎙️ Your saved voice needs a paid ElevenLabs plan, so I switched to <b>Brian</b> (free). Send /voices to pick another.").catch(() => {});
+          return voiceScenes(jobId, scenes, engine);
+        }
+        if (e instanceof ElevenLabsUnavailable && engine === "elevenlabs") {
+          // Out of credits (or blocked): use the free voice for the whole video so it sounds consistent.
+          await sendMessage(`🎙️ ${esc(e.message)}\nUsing the free Kokoro voice for this video instead.`).catch(() => {});
+          return voiceScenes(jobId, scenes, "kokoro");
+        }
+        throw e;
       }
       fs.writeFileSync(meta, JSON.stringify(words));
       console.log(`  • scene ${i + 1}/${scenes.length} recorded`);

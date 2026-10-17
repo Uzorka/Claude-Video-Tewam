@@ -65,7 +65,13 @@ export const config = {
  * Settings changed from Telegram (voice, which chat owns the bot) live in state/settings.json,
  * so they survive both laptop restarts and cloud runs (the workflow saves state/ to git).
  */
-export type StudioSettings = { voiceId?: string; ownerChatId?: string };
+export type StudioSettings = {
+  voiceId?: string; // ElevenLabs voice
+  ownerChatId?: string;
+  /** "auto" = ElevenLabs while credits last, then the free Kokoro voice. "kokoro" = always Kokoro. */
+  voiceEngine?: "auto" | "kokoro";
+  kokoroVoice?: string;
+};
 const SETTINGS_FILE = path.join(STATE_DIR, "settings.json");
 
 export function readSettings(): StudioSettings {
