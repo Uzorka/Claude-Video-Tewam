@@ -1,13 +1,14 @@
 import { useCurrentFrame } from "remotion";
 import type { WordTiming } from "../types";
+import { useVertical } from "./layout";
 import { FPS, theme } from "./theme";
 
-function chunk(words: WordTiming[]) {
+function chunk(words: WordTiming[], max: number) {
   const chunks: WordTiming[][] = [];
   let cur: WordTiming[] = [];
   for (const w of words) {
     cur.push(w);
-    if (cur.length >= 6 || (cur.length >= 3 && /[.?!,;:]$/.test(w.word))) {
+    if (cur.length >= max || (cur.length >= 3 && /[.?!,;:]$/.test(w.word))) {
       chunks.push(cur);
       cur = [];
     }
@@ -19,16 +20,18 @@ function chunk(words: WordTiming[]) {
 /** Word-by-word captions synced to the voice (most viewers watch on mute). */
 export const Captions: React.FC<{ words: WordTiming[] }> = ({ words }) => {
   const t = useCurrentFrame() / FPS;
-  const chunks = chunk(words);
+  const vertical = useVertical();
+  // Vertical: fewer, bigger words, placed above TikTok's caption area and buttons.
+  const chunks = chunk(words, vertical ? 4 : 6);
   const idx = chunks.findIndex((c, i) => t >= c[0].start - 0.05 && t < (chunks[i + 1]?.[0].start ?? c[c.length - 1].end + 0.6));
   if (idx < 0) return null;
   return (
-    <div style={{ position: "absolute", left: 0, right: 0, bottom: 84, display: "flex", justifyContent: "center", fontFamily: theme.font }}>
+    <div style={{ position: "absolute", left: vertical ? 60 : 0, right: vertical ? 120 : 0, bottom: vertical ? 560 : 84, display: "flex", justifyContent: "center", fontFamily: theme.font }}>
       <div
         style={{
-          maxWidth: 1500,
+          maxWidth: vertical ? 900 : 1500,
           textAlign: "center",
-          fontSize: 54,
+          fontSize: vertical ? 64 : 54,
           fontWeight: 800,
           lineHeight: 1.25,
           padding: "12px 26px",

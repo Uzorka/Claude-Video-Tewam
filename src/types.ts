@@ -90,6 +90,8 @@ export type RenderProps = {
   channelName: string;
   title: string;
   thumbnailText: string;
+  /** true = 1080x1920 vertical video for TikTok / YouTube Shorts / Reels. */
+  vertical?: boolean;
   scenes: RenderScene[];
   music: string | null;
 };
@@ -123,4 +125,8 @@ export type Job = {
   error: string | null;
   autoRetries?: number;
   demo?: boolean;
+  /** "vertical" = TikTok / Shorts format. */
+  format?: "landscape" | "vertical";
+  /** For a short made from a longer video: that video's job id. */
+  sourceJobId?: string;
 };

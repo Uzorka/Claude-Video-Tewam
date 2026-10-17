@@ -35,6 +35,8 @@ export const Root: React.FC = () => (
       defaultProps={sample}
       calculateMetadata={({ props }) => ({
         durationInFrames: props.scenes.reduce((n, s) => n + Math.round(s.duration * FPS), 0),
+        // Vertical (TikTok / Shorts / Reels) videos are 1080x1920.
+        ...(props.vertical ? { width: HEIGHT, height: WIDTH } : {}),
       })}
     />
     <Still id="Thumbnail" component={Thumbnail} width={1280} height={720} defaultProps={sample} />

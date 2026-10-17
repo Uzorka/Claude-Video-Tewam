@@ -6,7 +6,7 @@ import { createJob, jobDir, jobMediaDir, listJobs, loadPlan, loadText, saveJob, 
 import { fmtTime } from "./pipeline/media.js";
 import { makePreview, renderVideo } from "./pipeline/render.js";
 import { researchTopic } from "./pipeline/research.js";
-import { reviseScript, writeScript } from "./pipeline/script.js";
+import { reviseScript, writeScript, writeShort } from "./pipeline/script.js";
 import { captureScreenshots, fetchBroll, fetchRealVisuals, pickMusic } from "./pipeline/visuals.js";
 import { voiceScenes } from "./pipeline/voice.js";
 import { publish } from "./publish.js";
@@ -66,6 +66,7 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
     channelName: config.channel.name,
     title: plan.title,
     thumbnailText: plan.thumbnail_text,
+    vertical: job.format === "vertical",
     scenes,
     music: pickMusic(job.id),
   };
@@ -89,7 +90,7 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
     console.log("☁️  Saving files to GitHub Releases…");
     const mediaTar = path.join(OUT_DIR, "media.tar.gz");
     await tarDir(jobMediaDir(job.id), mediaTar);
-    await uploadRelease(tagFor(job), `🎬 ${plan.title} (v${job.version})`, `Review build for job ${job.id}.`, [videoFile, thumbFile, mediaTar]);
+    await uploadRelease(tagFor(job), `🎬 ${plan.title} (v${job.version})`, `Review build for job ${job.id}.`, [videoFile, thumbFile, mediaTar].filter((f): f is string => Boolean(f)));
     videoUrl = releaseUrl(tagFor(job), videoFile);
   }
   job.releaseTag = releasesEnabled() ? tagFor(job) : null;
@@ -182,7 +183,8 @@ export async function approveJob(job: Job) {
     const videoFile = path.join(OUT_DIR, `${name}.mp4`);
     const thumbFile = path.join(OUT_DIR, `${name}-thumbnail.jpg`);
     if (!fs.existsSync(videoFile) && job.releaseTag) await downloadRelease(job.releaseTag, `${name}*`, OUT_DIR);
-    await publish(job, plan, videoFile, thumbFile, job.fullVideoUrl, job.releaseTag ? releaseUrl(job.releaseTag, thumbFile) : null);
+    const hasThumb = job.format !== "vertical";
+    await publish(job, plan, videoFile, hasThumb ? thumbFile : null, job.fullVideoUrl, hasThumb && job.releaseTag ? releaseUrl(job.releaseTag, thumbFile) : null);
     job.status = config.youtube.publishMode === "api" ? "published" : "approved";
   } catch (e) {
     await failJob(job, e);
@@ -233,6 +235,38 @@ export async function makeDemo() {
   savePlan(job.id, demoPlan);
   try {
     await produceAndReview(job, demoPlan);
+  } catch (e) {
+    await failJob(job, e);
+  }
+  return job;
+}
+
+/**
+ * A vertical short (TikTok / Shorts / Reels). Made from an existing video's research and script,
+ * or from scratch for a new topic.
+ */
+export async function makeShort(source: Job | null, topic?: Topic) {
+  const job = createJob(source ? { ...source.topic, title: `${source.topic.title} (short)` } : topic!);
+  job.format = "vertical";
+  job.sourceJobId = source?.id;
+  saveJob(job);
+  await sendMessage(`📱 Making a vertical short: <b>${esc(job.topic.title)}</b>\nI'll send it in about 10-20 minutes.`);
+  try {
+    let brief: string;
+    if (source && fs.existsSync(path.join(jobDir(source.id), "research.md"))) {
+      brief = loadText(source.id, "research.md");
+      const images = path.join(jobDir(source.id), "images.json");
+      if (fs.existsSync(images)) saveText(job.id, "images.json", fs.readFileSync(images, "utf8"));
+    } else {
+      const research = await researchTopic(job.topic);
+      brief = research.brief;
+      saveText(job.id, "images.json", JSON.stringify(research.images, null, 2));
+    }
+    saveText(job.id, "research.md", brief);
+    const fullPlan = source && fs.existsSync(path.join(jobDir(source.id), "plan.json")) ? loadPlan(source.id) : undefined;
+    const plan = await writeShort(job.topic.title.replace(/ \(short\)$/, ""), brief, fullPlan);
+    savePlan(job.id, plan);
+    await produceAndReview(job, plan);
   } catch (e) {
     await failJob(job, e);
   }
