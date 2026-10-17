@@ -98,6 +98,9 @@ export async function fetchBroll(jobId: string, scenes: Scene[], minSeconds: Rec
   return out;
 }
 
+const BLOCKED_PAGE =
+  /\b(403|404|429|500|502|503)\b.{0,40}(error|forbidden|not found)|access denied|request could not be satisfied|forbidden|captcha|are you a robot|verify you are human|just a moment|enable javascript|unusual traffic|page not found/i;
+
 /** Full-page screenshots of public web pages, shown as a smooth scroll. */
 export async function captureScreenshots(jobId: string, scenes: Scene[]) {
   const out: Record<string, string> = {};
@@ -112,7 +115,13 @@ export async function captureScreenshots(jobId: string, scenes: Scene[]) {
     fs.mkdirSync(dir, { recursive: true });
     for (const scene of targets) {
       try {
-        await page.goto(scene.url!, { waitUntil: "networkidle", timeout: 45_000 });
+        const response = await page.goto(scene.url!, { waitUntil: "networkidle", timeout: 45_000 });
+        // Sites often block automated browsers with an error or "verify you are human" page: never film that.
+        const visible = (await page.evaluate(() => `${document.title}\n${document.body?.innerText ?? ""}`)).slice(0, 4000);
+        if ((response && response.status() >= 400) || BLOCKED_PAGE.test(visible) || visible.replace(/\s+/g, " ").length < 400) {
+          console.log(`  ✗ ${scene.url}: blocked or empty page, skipping`);
+          continue;
+        }
         // Best effort: dismiss common cookie banners.
         for (const label of ["Accept all", "Accept", "I agree", "Got it", "Allow all"]) {
           await page.getByRole("button", { name: label, exact: true }).first().click({ timeout: 800 }).catch(() => {});
