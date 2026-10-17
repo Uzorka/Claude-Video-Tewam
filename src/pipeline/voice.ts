@@ -1,10 +1,20 @@
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { config } from "../config.js";
+import { config, updateSettings } from "../config.js";
+import { sendMessage } from "../telegram.js";
 import { jobMediaDir } from "../jobs.js";
 import type { Scene, WordTiming } from "../types.js";
 import { probeDuration, publicPath, run } from "./media.js";
+
+/** A premade ElevenLabs voice ("Brian") that works on the free plan. */
+const FREE_FALLBACK_VOICE = "nPczCjzI2devNBz1zQrb";
+
+class PaidVoiceError extends Error {
+  constructor() {
+    super("This ElevenLabs voice needs a paid plan. On the free plan, use a voice marked (premade): send /voices in Telegram, then /voice followed by the ID you like.");
+  }
+}
 
 export type VoiceClip = { file: string; duration: number; words: WordTiming[] };
 
@@ -57,11 +67,7 @@ async function elevenLabs(text: string, previous: string, next: string, outFile:
       await new Promise((r) => setTimeout(r, 2000 * attempt));
       continue;
     }
-    if (res.status === 402 || /paid_plan_required|payment_required/.test(body)) {
-      throw new Error(
-        "This ElevenLabs voice needs a paid plan. On the free plan, use a voice marked (premade): send /voices in Telegram, then /voice followed by the ID you like.",
-      );
-    }
+    if (res.status === 402 || /paid_plan_required|payment_required/.test(body)) throw new PaidVoiceError();
     if (res.status === 401) throw new Error("ElevenLabs rejected the API key. Check ELEVENLABS_API_KEY.");
     if (/quota_exceeded/.test(body)) throw new Error("Your ElevenLabs credits for this month are used up. Wait for the monthly reset or upgrade.");
     throw new Error(`ElevenLabs error ${res.status}: ${body.slice(0, 300)}`);
@@ -100,9 +106,17 @@ export async function voiceScenes(jobId: string, scenes: Scene[]): Promise<Recor
     if (fs.existsSync(file) && fs.existsSync(meta)) {
       words = JSON.parse(fs.readFileSync(meta, "utf8"));
     } else {
-      words = useReal
-        ? await elevenLabs(scene.narration, scenes[i - 1]?.narration ?? "", scenes[i + 1]?.narration ?? "", file)
-        : await placeholder(scene.narration, file);
+      try {
+        words = useReal
+          ? await elevenLabs(scene.narration, scenes[i - 1]?.narration ?? "", scenes[i + 1]?.narration ?? "", file)
+          : await placeholder(scene.narration, file);
+      } catch (e) {
+        // The chosen voice needs a paid plan: switch to a free premade voice once and start over.
+        if (!(e instanceof PaidVoiceError) || config.elevenlabs.voiceId === FREE_FALLBACK_VOICE) throw e;
+        updateSettings({ voiceId: FREE_FALLBACK_VOICE });
+        await sendMessage("🎙️ Your saved voice needs a paid ElevenLabs plan, so I switched to <b>Brian</b> (free). Send /voices to pick another.").catch(() => {});
+        return voiceScenes(jobId, scenes);
+      }
       fs.writeFileSync(meta, JSON.stringify(words));
       console.log(`  • scene ${i + 1}/${scenes.length} recorded`);
     }

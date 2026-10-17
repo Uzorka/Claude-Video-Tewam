@@ -1,6 +1,6 @@
 import os from "node:os";
 import path from "node:path";
-import { config, saveEnv } from "./config.js";
+import { config, updateSettings } from "./config.js";
 import { addToLibrary, loadLibrary, parseTags } from "./library.js";
 import { demoPlan } from "./demo.js";
 import { createJob, listJobs, loadPlan, readState, writeState } from "./jobs.js";
@@ -65,7 +65,14 @@ export async function processInbox({ quiet = false } = {}) {
   for (const u of updates) {
     state.offset = u.update_id + 1;
     const msg = u.message;
-    if (!msg || String(msg.chat.id) !== config.telegram.chatId) continue; // ignore strangers
+    if (!msg) continue;
+    // No TELEGRAM_CHAT_ID set: the first person to message the bot privately becomes its owner.
+    if (!config.telegram.chatId && msg.chat.type === "private") {
+      updateSettings({ ownerChatId: String(msg.chat.id) });
+      tasks.push(() => sendMessage(`👋 Connected! This chat now controls your studio.\n\n${HELP}`));
+      continue;
+    }
+    if (String(msg.chat.id) !== config.telegram.chatId) continue; // ignore strangers
     // Photos and clips you send become part of your footage library.
     const media = msg.photo?.length
       ? { id: msg.photo[msg.photo.length - 1].file_id, kind: "photo" as const, size: msg.photo[msg.photo.length - 1].file_size ?? 0 }
@@ -129,8 +136,7 @@ export async function processInbox({ quiet = false } = {}) {
       tasks.push(async () => {
         const voice = (await listVoices()).find((v) => v.voice_id === id);
         if (!voice) return void (await sendMessage("I couldn't find that voice ID on your ElevenLabs account. Send /voices to see the list."));
-        saveEnv("ELEVENLABS_VOICE_ID", id);
-        config.elevenlabs.voiceId = id;
+        updateSettings({ voiceId: id });
         await sendMessage(`✅ Voice changed to <b>${esc(voice.name)}</b>. Send /demo to hear it.`);
       });
     } else if (/^\/status\b/i.test(text)) {

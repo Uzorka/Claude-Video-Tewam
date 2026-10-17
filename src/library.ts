@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { ROOT } from "./config.js";
+import { ROOT, STATE_DIR } from "./config.js";
+import { downloadRelease, releasesEnabled, uploadToRelease } from "./github.js";
 import { probeDuration, run } from "./pipeline/media.js";
 
 /**
@@ -8,7 +9,13 @@ import { probeDuration, run } from "./pipeline/media.js";
  * Whenever a video talks about something matching a caption, your footage is used first.
  */
 export const LIBRARY_DIR = path.join(ROOT, "assets", "library");
-const INDEX = path.join(LIBRARY_DIR, "index.json");
+/**
+ * On your laptop the files simply stay in assets/library. In the cloud every run starts fresh,
+ * so files are kept on a GitHub release ("footage-library") and the list in state/library.json.
+ */
+const CLOUD = Boolean(process.env.GITHUB_ACTIONS) && releasesEnabled();
+const RELEASE = "footage-library";
+const INDEX = CLOUD ? path.join(STATE_DIR, "library.json") : path.join(LIBRARY_DIR, "index.json");
 
 export type LibraryItem = { file: string; type: "photo" | "video"; tags: string[]; duration: number | null; added: string };
 
@@ -17,9 +24,17 @@ export function loadLibrary(): LibraryItem[] {
 }
 
 const saveLibrary = (items: LibraryItem[]) => {
-  fs.mkdirSync(LIBRARY_DIR, { recursive: true });
+  fs.mkdirSync(path.dirname(INDEX), { recursive: true });
   fs.writeFileSync(INDEX, JSON.stringify(items, null, 2) + "\n");
 };
+
+/** Make sure a library file is on this machine (downloading it from GitHub in the cloud). */
+export async function ensureLocal(item: LibraryItem) {
+  const file = path.join(LIBRARY_DIR, item.file);
+  if (!fs.existsSync(file) && CLOUD) await downloadRelease(RELEASE, item.file, LIBRARY_DIR);
+  if (!fs.existsSync(file)) throw new Error(`Library file missing: ${item.file}`);
+  return file;
+}
 
 /** "iPhone 18, unboxing; desk" → ["iphone 18", "unboxing", "desk"] */
 export const parseTags = (caption: string) =>
@@ -49,6 +64,7 @@ export async function addToLibrary(srcFile: string, kind: "photo" | "video", tag
     ]);
     duration = await probeDuration(file);
   }
+  if (CLOUD) await uploadToRelease(RELEASE, "📚 Footage library", file);
   const items = loadLibrary();
   items.push({ file: path.basename(file), type: kind, tags, duration, added: new Date().toISOString() });
   saveLibrary(items);
