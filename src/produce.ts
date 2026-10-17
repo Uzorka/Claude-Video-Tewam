@@ -11,6 +11,7 @@ import { captureScreenshots, fetchBroll, fetchRealVisuals, pickMusic } from "./p
 import { voiceScenes } from "./pipeline/voice.js";
 import { publish } from "./publish.js";
 import { esc, sendMessage, sendVideo } from "./telegram.js";
+import { demoPlan } from "./demo.js";
 import type { FoundImage, Job, RenderProps, RenderScene, Topic, VideoPlan } from "./types.js";
 
 const PAD = 0.3; // breathing room after each line, in seconds
@@ -219,4 +220,17 @@ export async function retryBusyJobs() {
     await retryJob(job);
     return; // one at a time
   }
+}
+
+/** A short sample video in your chosen voice (it can't be revised; it's only for checking the style). */
+export async function makeDemo() {
+  const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Testing the studio", score: 0, source_urls: [] });
+  job.demo = true;
+  savePlan(job.id, demoPlan);
+  try {
+    await produceAndReview(job, demoPlan);
+  } catch (e) {
+    await failJob(job, e);
+  }
+  return job;
 }

@@ -2,10 +2,10 @@ import os from "node:os";
 import path from "node:path";
 import { config, updateSettings } from "./config.js";
 import { addToLibrary, loadLibrary, parseTags } from "./library.js";
-import { demoPlan } from "./demo.js";
-import { createJob, listJobs, loadPlan, readState, writeState } from "./jobs.js";
+import { listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
-import { approveJob, makeVideo, produceAndReview, retryJob, reviseJob } from "./produce.js";
+import { approveJob, makeDemo, makeVideo, retryJob, reviseJob } from "./produce.js";
+import { elevenLabsCredits } from "./pipeline/voice.js";
 import { downloadTelegramFile, esc, getUpdates, sendMessage, type TgMessage } from "./telegram.js";
 import type { Job, Topic } from "./types.js";
 
@@ -38,8 +38,8 @@ function findJob(msg: TgMessage, jobs: Job[]): Job | undefined {
     const hit = jobs.find((j) => j.reviewMessageIds.includes(replyId));
     if (hit) return hit;
   }
-  // Not a reply: assume the most recent video waiting for you.
-  return [...jobs].reverse().find((j) => j.status === "in_review" || j.status === "failed");
+  // Not a reply: assume the most recent real video waiting for you (never the sample demo).
+  return [...jobs].reverse().find((j) => !j.demo && j.topic.title !== "Demo video" && (j.status === "in_review" || j.status === "failed"));
 }
 
 async function listVoices() {
@@ -105,8 +105,7 @@ export async function processInbox({ quiet = false } = {}) {
     } else if (/^\/demo\b/i.test(text)) {
       tasks.push(async () => {
         await sendMessage("🎬 Making a short sample video. It takes about 5 minutes…");
-        const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Requested from Telegram", score: 0, source_urls: [] });
-        await produceAndReview(job, demoPlan);
+        await makeDemo();
       });
     } else if (/^\/library\b/i.test(text)) {
       tasks.push(async () => {
@@ -139,11 +138,17 @@ export async function processInbox({ quiet = false } = {}) {
         updateSettings({ voiceId: id });
         await sendMessage(`✅ Voice changed to <b>${esc(voice.name)}</b>. Send /demo to hear it.`);
       });
+    } else if (!msg.reply_to_message && /^(hi|hello|hey|yo|hiya|thanks|thank you|ok|okay|cool|nice|good (morning|afternoon|evening))[!. ]*$/i.test(text)) {
+      tasks.push(() => sendMessage("👋 Hi! I'm here. Send /new followed by a topic to make a video, or /help to see everything I can do."));
     } else if (/^\/status\b/i.test(text)) {
       const active = jobs.filter((j) => !["published", "rejected", "approved"].includes(j.status));
-      tasks.push(() =>
-        sendMessage(active.length ? active.map((j) => `• <b>${esc(j.topic.title)}</b> – ${j.status} (v${j.version})`).join("\n") : "Nothing in progress. Send /topics or /new."),
-      );
+      tasks.push(async () => {
+        const c = await elevenLabsCredits();
+        const voice = "error" in c ? `\n\n🎙️ ${esc(c.error)}` : `\n\n🎙️ Voice credits: ${c.used} of ${c.limit} characters used (${c.tier} plan, resets ${c.resets ?? "?"}).`;
+        await sendMessage(
+          (active.length ? active.map((j) => `• <b>${esc(j.topic.title)}</b> – ${j.status} (v${j.version})`).join("\n") : "Nothing in progress. Send /topics or /new.") + voice,
+        );
+      });
     } else if (/^\/topics\b/i.test(text)) {
       tasks.push(async () => {
         const topics = await scoutTopics(5);
