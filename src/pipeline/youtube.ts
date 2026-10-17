@@ -48,6 +48,7 @@ export async function officialYouTubeVideos(product: string): Promise<{ id: stri
   const names = CHANNELS[brand] ?? [brand];
   const out = await ytdlp(["--flat-playlist", "--dump-json", `ytsearch20:${product}`]);
   const entries = out.split("\n").filter(Boolean).map((l) => JSON.parse(l) as Entry);
+  if (process.env.YT_DEBUG) for (const e of entries.slice(0, 12)) console.log(`    [yt] ${e.channel ?? "?"} / ${e.uploader ?? "?"} / ${e.channel_is_verified} / ${e.duration} / ${e.title}`);
   return entries
     .filter((e) => {
       const channel = (e.channel ?? e.uploader ?? "").toLowerCase().trim();
