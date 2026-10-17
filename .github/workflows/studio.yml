@@ -22,9 +22,10 @@ on:
           - make # research + produce a video now
           - short # vertical TikTok/Shorts version of the latest video (or of "topic")
           - topics # send today's trending topics to Telegram
+          - photos # preview the official product photos/videos found for "topic", e.g. Apple HomePod
           - inbox # read Telegram replies now
       topic:
-        description: (Optional, for "make" or "short") Your own topic instead of the trending pick / latest video
+        description: (Optional) For "make"/"short" your own topic; for "photos" a product name
         required: false
 
 # One run at a time so jobs never step on each other.
@@ -56,6 +57,7 @@ jobs:
       GEMINI_MODEL: ${{ vars.GEMINI_MODEL }}
       DESCRIPTION_FOOTER: ${{ vars.DESCRIPTION_FOOTER }}
       PRODUCT_PHOTOS: ${{ vars.PRODUCT_PHOTOS }}
+      OFFICIAL_MEDIA: ${{ vars.OFFICIAL_MEDIA }}
       CHANNEL_NAME: ${{ vars.CHANNEL_NAME }}
       CHANNEL_NICHE: ${{ vars.CHANNEL_NICHE }}
       CHANNEL_STYLE: ${{ vars.CHANNEL_STYLE }}

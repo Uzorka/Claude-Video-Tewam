@@ -1,8 +1,10 @@
-import { AbsoluteFill, interpolate, useCurrentFrame } from "remotion";
+import { AbsoluteFill, Img, interpolate, staticFile, useCurrentFrame } from "remotion";
+import { brandOf, coreWords, words } from "../../productName";
 import type { RenderScene } from "../../types";
 import { fadeIn, pop } from "../anim";
 import { useVertical } from "../layout";
-import { theme } from "../theme";
+import { isCutout, photoFrame } from "../Background";
+import { FPS, theme } from "../theme";
 
 const Center: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const vertical = useVertical();
@@ -152,6 +154,25 @@ export const CompareCard: React.FC<{ scene: RenderScene }> = ({ scene }) => {
   const vertical = useVertical();
   const col = (side: "left" | "right", data: { label: string; points: string[] } | null, color: string) => {
     const p = pop(frame, side === "left" ? 2 : 10);
+    const photo = scene.sidePhotos?.[side];
+    const picture = photo && (
+      <div
+        style={{
+          flexShrink: 0,
+          width: vertical ? 230 : "100%",
+          height: vertical ? 230 : 260,
+          marginBottom: vertical ? 0 : 26,
+          borderRadius: 20,
+          overflow: "hidden",
+          background: "rgba(255,255,255,0.06)",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Img src={staticFile(photo)} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain", transform: `scale(${0.9 + pop(frame, side === "left" ? 8 : 16) * 0.1})` }} />
+      </div>
+    );
     return (
       <div
         style={{
@@ -165,12 +186,17 @@ export const CompareCard: React.FC<{ scene: RenderScene }> = ({ scene }) => {
           transform: `translateX(${(1 - p) * (side === "left" ? -200 : 200)}px)`,
         }}
       >
-        <div style={{ fontSize: 60, fontWeight: 900, color, marginBottom: 26 }}>{data?.label}</div>
-        {data?.points.map((pt, i) => (
-          <div key={i} style={{ fontSize: 42, fontWeight: 600, marginBottom: 16, opacity: fadeIn(frame, 18 + i * 8) }}>
-            • {pt}
+        <div style={{ display: "flex", flexDirection: vertical ? "row" : "column", gap: vertical ? 30 : 0, alignItems: vertical ? "center" : "stretch" }}>
+          {picture}
+          <div>
+            <div style={{ fontSize: photo && vertical ? 52 : 60, fontWeight: 900, color, marginBottom: 26 }}>{data?.label}</div>
+            {data?.points.map((pt, i) => (
+              <div key={i} style={{ fontSize: photo && vertical ? 36 : 42, fontWeight: 600, marginBottom: 16, opacity: fadeIn(frame, 18 + i * 8) }}>
+                • {pt}
+              </div>
+            ))}
           </div>
-        ))}
+        </div>
       </div>
     );
   };
@@ -448,5 +474,52 @@ export const ProductSpotlight: React.FC<{ scene: RenderScene }> = ({ scene }) =>
         </div>
       </div>
     </Center>
+  );
+};
+
+/**
+ * The product's official photo pops up the moment its name is said, with the name under it,
+ * so viewers can connect the name to the thing ("oh, THAT's the HomePod").
+ */
+export const ProductReveal: React.FC<{ scene: RenderScene; durationInFrames: number }> = ({ scene, durationInFrames }) => {
+  const frame = useCurrentFrame();
+  const vertical = useVertical();
+  const product = scene.product!;
+  const names = new Set([...coreWords(product), brandOf(product)]);
+  const said = scene.words.find((w) => words(w.word).some((x) => names.has(x)));
+  const start = Math.max(0, Math.round(((said?.start ?? 0.3) - 0.15) * FPS));
+  const length = Math.min(78, durationInFrames - start - 6);
+  if (length < 30) return null;
+  const local = frame - start;
+  if (local < 0 || local > length) return null;
+  const p = pop(local, 0, 16);
+  const out = interpolate(local, [length - 8, length], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  return (
+    <AbsoluteFill style={{ opacity: out, fontFamily: theme.font, color: theme.text }}>
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(circle at 50% ${vertical ? 45 : 42}%, rgba(76,201,240,${isCutout(scene.photo) ? 0.22 : 0}), transparent 45%), rgba(7,8,12,0.82)`,
+          opacity: Math.min(1, p * 1.5),
+        }}
+      />
+      <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: vertical ? "300px 60px 620px" : "120px 160px 200px", flexDirection: "column", gap: 34 }}>
+        <Img
+          src={staticFile(scene.photo!)}
+          style={{
+            maxWidth: "100%",
+            maxHeight: vertical ? 760 : 560,
+            objectFit: "contain",
+            ...photoFrame(isCutout(scene.photo)),
+            transform: `scale(${0.85 + p * 0.15}) translateY(${(1 - p) * 40}px)`,
+            opacity: p,
+          }}
+        />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, opacity: fadeIn(local, 6, 10), transform: `translateY(${(1 - fadeIn(local, 6, 10)) * 20}px)` }}>
+          <div style={{ width: 10, height: vertical ? 64 : 58, background: theme.accent, borderRadius: 5 }} />
+          <div style={{ fontSize: vertical ? 64 : 60, fontWeight: 900, letterSpacing: -1.5 }}>{product}</div>
+        </div>
+        {scene.photoCredit && <div style={{ fontSize: 20, color: "rgba(255,255,255,0.55)", marginTop: -14 }}>📷 {scene.photoCredit}</div>}
+      </AbsoluteFill>
+    </AbsoluteFill>
   );
 };

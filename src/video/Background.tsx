@@ -57,47 +57,108 @@ export const Footage: React.FC<{ scene: RenderScene; durationInFrames: number; d
   );
 };
 
-/** Scrolling capture of a web page inside a browser frame. */
-export const PageScroll: React.FC<{ src: string; durationInFrames: number }> = ({ src, durationInFrames }) => {
+/**
+ * A close-up of the passage on a web page that backs up what's being said: the browser frame shows the
+ * site's address, the camera eases in on the passage and a highlighter sweeps across it.
+ */
+export const PageFocus: React.FC<{ scene: RenderScene; durationInFrames: number }> = ({ scene, durationInFrames }) => {
   const frame = useCurrentFrame();
-  // object-position scrolls a tall capture from top to bottom whatever its height.
-  const y = interpolate(frame, [15, durationInFrames - 10], [0, 60], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   const vertical = useVertical();
+  const box = vertical ? { left: 50, top: 290, width: 980, height: 940 } : { left: 200, top: 130, width: 1520, height: 740 };
+  const bar = 54;
+  const viewH = box.height - bar;
+  const focus = scene.imageFocus;
+  const zoom = interpolate(frame, [0, durationInFrames], [1, 1.12], { extrapolateRight: "clamp" });
+  const rise = interpolate(frame, [0, 14], [50, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
+  const sweep = interpolate(frame, [12, 34], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 2) });
+
+  let sheet: React.ReactNode;
+  if (focus) {
+    // Lay the capture out at frame width x zoom and keep the passage in the middle of the window.
+    const w = box.width * zoom;
+    const h = w / focus.aspect;
+    const cx = (focus.x + focus.w / 2) * w;
+    const cy = (focus.y + focus.h / 2) * h;
+    const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+    const tx = w > box.width ? clamp(box.width / 2 - cx, box.width - w, 0) : (box.width - w) / 2;
+    const ty = h > viewH ? clamp(viewH / 2 - cy, viewH - h, 0) : (viewH - h) / 2;
+    sheet = (
+      <div style={{ position: "absolute", left: 0, top: 0, width: w, height: h, transform: `translate(${tx}px, ${ty}px)` }}>
+        <Img src={staticFile(scene.image!)} style={{ width: "100%", height: "100%" }} />
+        <div
+          style={{
+            position: "absolute",
+            left: `${(focus.x - 0.006) * 100}%`,
+            top: `${(focus.y - 0.01) * 100}%`,
+            width: `${(focus.w + 0.012) * sweep * 100}%`,
+            height: `${(focus.h + 0.02) * 100}%`,
+            background: "#ffe14d",
+            mixBlendMode: "multiply",
+            opacity: 0.75,
+            borderRadius: 6,
+          }}
+        />
+      </div>
+    );
+  } else {
+    sheet = <Img src={staticFile(scene.image!)} style={{ width: "100%", height: "100%", objectFit: "cover", objectPosition: "50% 0%", transform: `scale(${zoom})`, transformOrigin: "50% 0%" }} />;
+  }
+
   return (
     <div
       style={{
         position: "absolute",
-        left: vertical ? 60 : 260,
-        right: vertical ? 60 : 260,
-        top: vertical ? 260 : 120,
-        bottom: vertical ? 700 : 200,
+        ...box,
         borderRadius: 22,
         overflow: "hidden",
         border: `1px solid ${theme.stroke}`,
         boxShadow: "0 40px 120px rgba(0,0,0,0.6)",
         background: "#fff",
+        transform: `translateY(${rise}px)`,
+        fontFamily: theme.font,
       }}
     >
-      <div style={{ height: 44, background: "#1c1f2a", display: "flex", alignItems: "center", gap: 10, paddingLeft: 18 }}>
+      <div style={{ height: bar, background: "#1c1f2a", display: "flex", alignItems: "center", gap: 10, padding: "0 18px" }}>
         {["#ff5f57", "#febc2e", "#28c840"].map((c) => (
           <div key={c} style={{ width: 13, height: 13, borderRadius: 7, background: c }} />
         ))}
+        {scene.imageHost && (
+          <div style={{ marginLeft: 16, flex: 1, height: 34, borderRadius: 17, background: "#2a2e3c", color: "#c9cfdd", fontSize: 21, display: "flex", alignItems: "center", padding: "0 18px" }}>
+            🔒 {scene.imageHost}
+          </div>
+        )}
       </div>
-      <Img src={staticFile(src)} style={{ width: "100%", height: "calc(100% - 44px)", objectFit: "cover", objectPosition: `50% ${y}%` }} />
+      <div style={{ position: "relative", height: viewH, overflow: "hidden" }}>{sheet}</div>
     </div>
   );
 };
 
+/** Product photos cut out of a white studio backdrop are transparent PNGs. */
+export const isCutout = (photo: string | null | undefined) => Boolean(photo?.endsWith(".png"));
+
+/** A cut-out product floats with a soft shadow; a normal photo gets rounded corners and a drop shadow. */
+export const photoFrame = (cutout: boolean): React.CSSProperties =>
+  cutout ? { filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6))" } : { borderRadius: 24, boxShadow: "0 50px 140px rgba(0,0,0,0.65)" };
+
 /** Real product photo: sharp on a blurred copy of itself, slow push-in, name and credit. */
-export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed }) => {
+export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed: wantFullBleed }) => {
   const frame = useCurrentFrame();
   const vertical = useVertical();
+  const cutout = isCutout(scene.photo);
+  const fullBleed = wantFullBleed && !cutout;
   const zoom = interpolate(frame, [0, durationInFrames], [1, 1.08]);
   const rise = interpolate(frame, [0, 14], [40, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
   const src = staticFile(scene.photo!);
   return (
     <AbsoluteFill style={{ backgroundColor: theme.bg, overflow: "hidden" }}>
-      <Img src={src} style={{ position: "absolute", inset: -60, width: "calc(100% + 120px)", height: "calc(100% + 120px)", objectFit: "cover", filter: fullBleed ? undefined : "blur(40px) brightness(0.45)", transform: `scale(${fullBleed ? zoom : 1.1})` }} />
+      {cutout ? (
+        <>
+          <Backdrop seed={3} />
+          <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 52%, rgba(255,255,255,0.16), transparent 42%)" }} />
+        </>
+      ) : (
+        <Img src={src} style={{ position: "absolute", inset: -60, width: "calc(100% + 120px)", height: "calc(100% + 120px)", objectFit: "cover", filter: fullBleed ? undefined : "blur(40px) brightness(0.45)", transform: `scale(${fullBleed ? zoom : 1.1})` }} />
+      )}
       {fullBleed ? (
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(7,8,12,0.35) 0%, rgba(7,8,12,0) 40%, rgba(7,8,12,0.8) 100%)" }} />
       ) : (
@@ -108,8 +169,7 @@ export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: numbe
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
-              borderRadius: 24,
-              boxShadow: "0 50px 140px rgba(0,0,0,0.65)",
+              ...photoFrame(cutout),
               transform: `translateY(${rise}px) scale(${zoom})`,
             }}
           />

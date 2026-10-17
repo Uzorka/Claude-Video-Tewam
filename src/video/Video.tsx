@@ -1,9 +1,9 @@
 import { AbsoluteFill, Audio, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig } from "remotion";
 import type { RenderProps, RenderScene } from "../types";
 import { fadeIn } from "./anim";
-import { Backdrop, Footage, PageScroll, ProductShot } from "./Background";
+import { Backdrop, Footage, PageFocus, ProductShot } from "./Background";
 import { Captions } from "./Captions";
-import { CompareCard, ListCard, LowerThird, ProcessCard, ProductSpotlight, QuoteCard, SpecsCard, StatCard, TimelineCard, TitleCard } from "./scenes/Cards";
+import { CompareCard, ListCard, LowerThird, ProcessCard, ProductReveal, ProductSpotlight, QuoteCard, SpecsCard, StatCard, TimelineCard, TitleCard } from "./scenes/Cards";
 import { VerticalContext } from "./layout";
 import { FPS, theme } from "./theme";
 
@@ -31,13 +31,13 @@ const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: num
       foreground = <QuoteCard scene={scene} />;
       break;
     case "screenshot":
-      foreground = scene.image ? <PageScroll src={scene.image} durationInFrames={durationInFrames} /> : <TitleCard scene={scene} />;
+      foreground = scene.image ? <PageFocus scene={scene} durationInFrames={durationInFrames} /> : <TitleCard scene={scene} />;
       break;
     case "broll":
       foreground = isBroll || scene.photo ? <LowerThird scene={scene} /> : <TitleCard scene={scene} />;
       break;
     case "product":
-      foreground = scene.photo ? <LowerThird scene={{ ...scene, heading: scene.heading ?? scene.product }} /> : <ProductSpotlight scene={scene} />;
+      foreground = scene.photo || scene.broll ? <LowerThird scene={{ ...scene, heading: scene.heading ?? scene.product }} /> : <ProductSpotlight scene={scene} />;
       break;
     case "process":
       foreground = <ProcessCard scene={scene} durationInFrames={durationInFrames} />;
@@ -50,12 +50,12 @@ const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: num
       break;
   }
 
-  // Real product photo: hero shot for "product" scenes, full-screen for b-roll without footage.
+  // Product scenes: the maker's own video clip if there is one, else the official photo as a hero shot.
   const background =
-    scene.photo && (scene.kind === "product" || (scene.kind === "broll" && !scene.broll)) ? (
+    scene.photo && !scene.broll && (scene.kind === "product" || scene.kind === "broll") ? (
       <ProductShot scene={scene} durationInFrames={durationInFrames} fullBleed={scene.kind === "broll"} />
     ) : scene.broll ? (
-      <Footage scene={scene} durationInFrames={durationInFrames} dim={isBroll ? 0.25 : 0.88} blur={isBroll ? 0 : 8} />
+      <Footage scene={scene} durationInFrames={durationInFrames} dim={isBroll || scene.kind === "product" ? 0.25 : 0.88} blur={isBroll || scene.kind === "product" ? 0 : 8} />
     ) : (
       <Backdrop seed={index} />
     );
@@ -64,6 +64,10 @@ const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: num
     <AbsoluteFill style={{ transform: `scale(${enter})`, opacity: fadeIn(frame, 0, 4) }}>
       {background}
       {foreground}
+      {/* Any other scene that names a product: its photo pops up when the name is said. */}
+      {scene.photo && scene.product && !["product", "broll", "screenshot"].includes(scene.kind) && !scene.sidePhotos && (
+        <ProductReveal scene={scene} durationInFrames={durationInFrames} />
+      )}
       {scene.audio && <Audio src={staticFile(scene.audio)} />}
     </AbsoluteFill>
   );

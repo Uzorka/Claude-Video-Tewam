@@ -1,11 +1,16 @@
-import { config, requireKeys, saveEnv } from "./config.js";
+import { OUT_DIR, config, requireKeys, saveEnv } from "./config.js";
 import { readState, writeState } from "./jobs.js";
 import { processInbox } from "./inbox.js";
+import { findOfficialMedia } from "./pipeline/official.js";
 import { scoutTopics } from "./pipeline/trends.js";
 import { elevenLabsCredits } from "./pipeline/voice.js";
 import { makeDemo, makeShort, makeVideo, retryBusyJobs } from "./produce.js";
 import { listJobs } from "./jobs.js";
-import { esc, sendMessage } from "./telegram.js";
+import { esc, sendMessage, sendPhoto, sendVideo } from "./telegram.js";
+import { uploadToRelease } from "./github.js";
+import { downloadImage, downloadVideo } from "./pipeline/visuals.js";
+import fs from "node:fs";
+import path from "node:path";
 import type { Topic } from "./types.js";
 
 const [command = "help", ...rest] = process.argv.slice(2);
@@ -160,6 +165,28 @@ async function main() {
     case "demo":
       await makeDemo();
       break;
+    case "photos": {
+      // Preview the official photos and clips the studio finds for a product (sent to Telegram, kept on the "photo-previews" release).
+      const product = arg("topic") || "Apple HomePod";
+      const media = await findOfficialMedia(product);
+      const dir = path.join(OUT_DIR, "photos");
+      fs.mkdirSync(dir, { recursive: true });
+      const files: string[] = [];
+      for (const img of media.images.slice(0, 4)) {
+        const f = await downloadImage(img, dir);
+        if (f) files.push(f);
+      }
+      const clip = media.videos.length ? await downloadVideo(media.videos[0], dir) : null;
+      if (clip) files.push(clip.file);
+      console.log(`  ${files.length} files ready:\n${files.map((f) => `   ${path.basename(f)}`).join("\n")}`);
+      for (const f of files) await uploadToRelease("photo-previews", "Photo previews", f).catch((e) => console.log(`  (upload: ${(e as Error).message})`));
+      if (config.telegram.botToken && config.telegram.chatId) {
+        await sendMessage(`🔎 <b>Official media for ${esc(product)}</b>\n${media.site ? `From ${esc(media.site)}` : "Nothing found on the maker's website."}`).catch(() => {});
+        for (const f of files.filter((f) => /\.(png|jpg)$/.test(f))) await sendPhoto(f, esc(product)).catch(() => {});
+        if (clip) await sendVideo(clip.file, `${esc(product)}: official clip`).catch(() => {});
+      }
+      break;
+    }
     case "short": {
       // A vertical short of your topic, or of the latest finished video.
       const custom = arg("topic");
