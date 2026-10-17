@@ -5,7 +5,7 @@ import { DEFAULT_KOKORO_VOICE, KOKORO_VOICES } from "./pipeline/kokoro.js";
 import { addToLibrary, loadLibrary, parseTags } from "./library.js";
 import { listJobs, loadPlan, readState, writeState } from "./jobs.js";
 import { scoutTopics } from "./pipeline/trends.js";
-import { approveJob, makeDemo, makeVideo, retryJob, reviseJob } from "./produce.js";
+import { approveJob, makeDemo, makeShort, makeVideo, retryJob, reviseJob } from "./produce.js";
 import { elevenLabsCredits } from "./pipeline/voice.js";
 import { downloadTelegramFile, esc, getUpdates, sendMessage, type TgMessage } from "./telegram.js";
 import type { Job, Topic } from "./types.js";
@@ -22,6 +22,8 @@ Commands:
 • <code>/topics</code> – today's best trending topics
 • <code>/make 2</code> – make topic #2 from the last /topics list
 • <code>/new your topic here</code> – make a video on any topic you choose
+• <code>/short</code> – turn a video into a 45-60s vertical TikTok / Shorts version (reply to its message, or it uses the latest)
+• <code>/newshort your topic</code> – a vertical short on a new topic
 • <code>/status</code> – what's in progress
 • <code>/demo</code> – a short sample video to check the style and voice
 • <code>/voices</code> – list voices, then <code>/voice ID</code> to switch
@@ -172,6 +174,14 @@ export async function processInbox({ quiet = false } = {}) {
       const n = Number(text.match(/\d+/)![0]);
       const topic = readState<Topic[]>("last_topics", [])[n - 1];
       tasks.push(() => (topic ? makeVideo(topic) : sendMessage("I don't have that topic. Send /topics first.")));
+    } else if (/^\/newshort\s+\S/i.test(text)) {
+      tasks.push(() => makeShort(null, customTopic(text.replace(/^\/newshort\s+/i, ""))));
+    } else if (/^\/short\b/i.test(text)) {
+      const replyId = msg.reply_to_message?.message_id;
+      const source =
+        (replyId && jobs.find((j) => j.reviewMessageIds.includes(replyId))) ||
+        [...jobs].reverse().find((j) => !j.demo && j.format !== "vertical" && ["in_review", "approved", "published"].includes(j.status));
+      tasks.push(() => (source ? makeShort(source) : sendMessage("I don't have a finished video to shorten yet. Send /newshort followed by a topic instead.")));
     } else if (/^\/new\s+\S/i.test(text)) {
       tasks.push(() => makeVideo(customTopic(text.replace(/^\/new\s+/i, ""))));
     } else {

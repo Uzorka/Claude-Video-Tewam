@@ -76,3 +76,26 @@ Research brief:
 ${brief}`,
   );
 }
+
+/** A 45-60 second vertical short (TikTok / YouTube Shorts / Reels), from a full video plan or straight from research. */
+export async function writeShort(topicTitle: string, brief: string, fullPlan?: VideoPlan): Promise<VideoPlan> {
+  console.log("✍️  Writing the short (vertical) version…");
+  return structured(
+    VideoPlanSchema,
+    writerSystem(),
+    `Make a VERTICAL SHORT (TikTok / YouTube Shorts / Instagram Reels) about: ${topicTitle}
+
+Rules for shorts:
+- 45 to 60 seconds: 110 to 150 spoken words in total, 6 to 9 scenes, each scene 1-2 short sentences.
+- Scene 1 is the hook and must grab attention in the first 2 seconds: the single most surprising fact or a bold question. No greeting, no "in this video".
+- Keep only the most interesting points. Prefer visual scenes: stat, process, compare, specs, product, timeline. At most 2 broll scenes.
+- On-screen text must be very short (max 4 words per heading; list items max 4 words; max 4 rows/steps/events).
+- Last scene: a punchy one-line verdict, then "Follow for more." (no other call to action).
+- title: a short, catchy caption for TikTok (max 80 characters).
+- description: the caption body with 4-6 relevant hashtags at the end (e.g. #tech #AI #tesla). No links.
+- thumbnail_text: 2-3 words.
+${fullPlan ? `\nTurn this full-length video into the short (same facts, much tighter):\n${JSON.stringify(fullPlan.scenes.map((s) => ({ kind: s.kind, narration: s.narration, heading: s.heading })), null, 1)}\n` : ""}
+Research brief (the only source of facts):
+${brief}`,
+  );
+}

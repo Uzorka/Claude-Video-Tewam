@@ -4,6 +4,7 @@ import { fadeIn } from "./anim";
 import { Backdrop, Footage, PageScroll, ProductShot } from "./Background";
 import { Captions } from "./Captions";
 import { CompareCard, ListCard, LowerThird, ProcessCard, ProductSpotlight, QuoteCard, SpecsCard, StatCard, TimelineCard, TitleCard } from "./scenes/Cards";
+import { VerticalContext } from "./layout";
 import { FPS, theme } from "./theme";
 
 const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: number }> = ({ scene, index, durationInFrames }) => {
@@ -79,41 +80,43 @@ const CutFlash: React.FC = () => {
   );
 };
 
-const Chrome: React.FC<{ channelName: string }> = ({ channelName }) => {
+const Chrome: React.FC<{ channelName: string; vertical: boolean }> = ({ channelName, vertical }) => {
   const frame = useCurrentFrame();
   const { durationInFrames } = useVideoConfig();
   return (
     <AbsoluteFill style={{ pointerEvents: "none", fontFamily: theme.font }}>
       <div style={{ position: "absolute", top: 0, left: 0, height: 6, width: `${(frame / durationInFrames) * 100}%`, background: theme.accent }} />
-      <div style={{ position: "absolute", top: 40, right: 54, fontSize: 24, fontWeight: 800, letterSpacing: 4, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
+      <div style={{ position: "absolute", top: vertical ? 190 : 40, left: vertical ? 70 : undefined, right: vertical ? undefined : 54, fontSize: vertical ? 28 : 24, fontWeight: 800, letterSpacing: 4, color: "rgba(255,255,255,0.7)", textTransform: "uppercase" }}>
         <span style={{ color: theme.accent }}>●</span> {channelName}
       </div>
     </AbsoluteFill>
   );
 };
 
-export const Video: React.FC<RenderProps> = ({ scenes, music, channelName }) => {
+export const Video: React.FC<RenderProps> = ({ scenes, music, channelName, vertical = false }) => {
   let from = 0;
   return (
-    <AbsoluteFill style={{ backgroundColor: theme.bg }}>
-      {scenes.map((scene, i) => {
-        const durationInFrames = Math.round(scene.duration * FPS);
-        const start = from;
-        from += durationInFrames;
-        return (
-          <Sequence key={scene.id + i} from={start} durationInFrames={durationInFrames} name={`${i + 1}. ${scene.kind}: ${scene.id}`}>
-            <Scene scene={scene} index={i} durationInFrames={durationInFrames} />
-            <Captions words={scene.words} />
-            {i > 0 && (
-              <Sequence durationInFrames={9}>
-                <CutFlash />
-              </Sequence>
-            )}
-          </Sequence>
-        );
-      })}
-      <Chrome channelName={channelName} />
-      {music && <Audio src={staticFile(music)} volume={0.1} loop />}
-    </AbsoluteFill>
+    <VerticalContext.Provider value={vertical}>
+      <AbsoluteFill style={{ backgroundColor: theme.bg }}>
+        {scenes.map((scene, i) => {
+          const durationInFrames = Math.round(scene.duration * FPS);
+          const start = from;
+          from += durationInFrames;
+          return (
+            <Sequence key={scene.id + i} from={start} durationInFrames={durationInFrames} name={`${i + 1}. ${scene.kind}: ${scene.id}`}>
+              <Scene scene={scene} index={i} durationInFrames={durationInFrames} />
+              <Captions words={scene.words} />
+              {i > 0 && (
+                <Sequence durationInFrames={9}>
+                  <CutFlash />
+                </Sequence>
+              )}
+            </Sequence>
+          );
+        })}
+        <Chrome channelName={channelName} vertical={vertical} />
+        {music && <Audio src={staticFile(music)} volume={0.1} loop />}
+      </AbsoluteFill>
+    </VerticalContext.Provider>
   );
 };

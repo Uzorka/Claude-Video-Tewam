@@ -20,10 +20,11 @@ on:
           - check # test your keys and connections
           - demo # render a sample video and send it to Telegram
           - make # research + produce a video now
+          - short # vertical TikTok/Shorts version of the latest video (or of "topic")
           - topics # send today's trending topics to Telegram
           - inbox # read Telegram replies now
       topic:
-        description: (Optional, for "make") Your own topic instead of the trending pick
+        description: (Optional, for "make" or "short") Your own topic instead of the trending pick / latest video
         required: false
 
 # One run at a time so jobs never step on each other.

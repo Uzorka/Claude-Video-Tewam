@@ -40,6 +40,9 @@ export async function renderVideo(props: RenderProps, name: string) {
     },
   });
 
+  // Shorts don't need a separate thumbnail: TikTok / Shorts pick a frame (or a cover) in the app.
+  if (props.vertical) return { videoFile, thumbFile: null };
+
   console.log("🖼️  Rendering thumbnail…");
   const thumb = await selectComposition({ serveUrl, id: "Thumbnail", inputProps, browserExecutable: browserExecutable() });
   const thumbFile = path.join(OUT_DIR, `${name}-thumbnail.jpg`);

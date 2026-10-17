@@ -1,5 +1,6 @@
 import { AbsoluteFill, Img, Loop, OffthreadVideo, interpolate, staticFile, useCurrentFrame } from "remotion";
 import type { RenderScene } from "../types";
+import { useVertical } from "./layout";
 import { FPS, theme } from "./theme";
 
 /** Animated gradient + grid used when there's no footage. */
@@ -61,14 +62,15 @@ export const PageScroll: React.FC<{ src: string; durationInFrames: number }> = (
   const frame = useCurrentFrame();
   // object-position scrolls a tall capture from top to bottom whatever its height.
   const y = interpolate(frame, [15, durationInFrames - 10], [0, 60], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
+  const vertical = useVertical();
   return (
     <div
       style={{
         position: "absolute",
-        left: 260,
-        right: 260,
-        top: 120,
-        bottom: 200,
+        left: vertical ? 60 : 260,
+        right: vertical ? 60 : 260,
+        top: vertical ? 260 : 120,
+        bottom: vertical ? 700 : 200,
         borderRadius: 22,
         overflow: "hidden",
         border: `1px solid ${theme.stroke}`,
@@ -89,6 +91,7 @@ export const PageScroll: React.FC<{ src: string; durationInFrames: number }> = (
 /** Real product photo: sharp on a blurred copy of itself, slow push-in, name and credit. */
 export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed }) => {
   const frame = useCurrentFrame();
+  const vertical = useVertical();
   const zoom = interpolate(frame, [0, durationInFrames], [1, 1.08]);
   const rise = interpolate(frame, [0, 14], [40, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
   const src = staticFile(scene.photo!);
@@ -98,7 +101,7 @@ export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: numbe
       {fullBleed ? (
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(7,8,12,0.35) 0%, rgba(7,8,12,0) 40%, rgba(7,8,12,0.8) 100%)" }} />
       ) : (
-        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: "250px 160px 190px" }}>
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: vertical ? "420px 60px 700px" : "250px 160px 190px" }}>
           <Img
             src={src}
             style={{

@@ -10,7 +10,7 @@ const privacy = () => (process.env.PUBLISH_PRIVACY ?? "public").trim() as "publi
 const disclose = () => (process.env.DISCLOSE_SYNTHETIC ?? "true").trim() !== "false";
 
 /** Upload straight to YouTube. Only goes public once your Google project has passed YouTube's API audit. */
-async function uploadToYouTube(plan: VideoPlan, videoFile: string, thumbFile: string) {
+async function uploadToYouTube(plan: VideoPlan, videoFile: string, thumbFile: string | null) {
   requireKeys("YOUTUBE_CLIENT_ID", "YOUTUBE_CLIENT_SECRET", "YOUTUBE_REFRESH_TOKEN");
   const auth = new google.auth.OAuth2(config.youtube.clientId, config.youtube.clientSecret);
   auth.setCredentials({ refresh_token: config.youtube.refreshToken });
@@ -37,6 +37,7 @@ async function uploadToYouTube(plan: VideoPlan, videoFile: string, thumbFile: st
     media: { body: fs.createReadStream(videoFile) },
   });
   const id = res.data.id!;
+  if (!thumbFile) return id; // Shorts use a frame from the video
   try {
     await youtube.thumbnails.set({ videoId: id, media: { mimeType: "image/jpeg", body: fs.createReadStream(thumbFile) } });
   } catch (e) {
@@ -45,13 +46,27 @@ async function uploadToYouTube(plan: VideoPlan, videoFile: string, thumbFile: st
   return id;
 }
 
-export async function publish(job: Job, plan: VideoPlan, videoFile: string, thumbFile: string, videoUrl: string | null, thumbUrl: string | null) {
+export async function publish(job: Job, plan: VideoPlan, videoFile: string, thumbFile: string | null, videoUrl: string | null, thumbUrl: string | null) {
   // e.g. the credit line ElevenLabs' free plan requires.
   const footer = (process.env.DESCRIPTION_FOOTER ?? "").trim();
   if (footer) plan = { ...plan, description: `${plan.description}\n\n${footer}` };
   // Credit the photographers/sites whose product photos appear in the video.
   const credits = fs.existsSync(path.join(jobDir(job.id), "credits.txt")) ? loadText(job.id, "credits.txt").trim() : "";
   if (credits) plan = { ...plan, description: `${plan.description}\n\nImages:\n${credits}` };
+  if (job.format === "vertical") {
+    // Shorts: one file works for TikTok, YouTube Shorts and Instagram Reels.
+    await sendMessage(
+      `✅ <b>Approved: your short is ready to post</b>
+
+1. Download the video:
+${videoUrl ?? `On your computer: ${videoFile}`}
+2. <b>TikTok:</b> tap <b>+</b> → <b>Upload</b> → pick the video → paste the caption below. Turn on <b>AI-generated content</b> in "More options".
+3. <b>YouTube Shorts:</b> YouTube app → <b>+</b> → <b>Upload a video</b> (it becomes a Short automatically because it's vertical and under 3 minutes).
+4. <b>Instagram Reels:</b> + → <b>Reel</b> → pick the video.`,
+    );
+    await sendMessage(`<b>Caption</b> (tap to copy)\n<pre>${esc(`${plan.title}\n\n${plan.description}`)}</pre>`);
+    return;
+  }
   if (config.youtube.publishMode === "api") {
     const id = await uploadToYouTube(plan, videoFile, thumbFile);
     job.youtubeId = id;
@@ -62,7 +77,7 @@ export async function publish(job: Job, plan: VideoPlan, videoFile: string, thum
   }
 
   // Manual mode: hand over everything needed for a 2-minute upload in YouTube Studio.
-  await sendPhoto(thumbFile, `🖼️ Thumbnail for: <b>${esc(plan.title)}</b>`);
+  if (thumbFile) await sendPhoto(thumbFile, `🖼️ Thumbnail for: <b>${esc(plan.title)}</b>`);
   await sendMessage(
     `✅ <b>Approved: ready to upload</b>
 

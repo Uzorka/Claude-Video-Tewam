@@ -3,7 +3,8 @@ import { readState, writeState } from "./jobs.js";
 import { processInbox } from "./inbox.js";
 import { scoutTopics } from "./pipeline/trends.js";
 import { elevenLabsCredits } from "./pipeline/voice.js";
-import { makeDemo, makeVideo, retryBusyJobs } from "./produce.js";
+import { makeDemo, makeShort, makeVideo, retryBusyJobs } from "./produce.js";
+import { listJobs } from "./jobs.js";
 import { esc, sendMessage } from "./telegram.js";
 import type { Topic } from "./types.js";
 
@@ -159,6 +160,19 @@ async function main() {
     case "demo":
       await makeDemo();
       break;
+    case "short": {
+      // A vertical short of your topic, or of the latest finished video.
+      const custom = arg("topic");
+      const source = [...listJobs()].reverse().find((j) => !j.demo && j.format !== "vertical" && ["in_review", "approved", "published"].includes(j.status));
+      const job = custom
+        ? await makeShort(null, { title: custom, angle: "As requested by the channel owner.", why_now: "Requested directly by the channel owner.", score: 100, source_urls: [] })
+        : source
+          ? await makeShort(source)
+          : null;
+      if (!job) console.log("No finished video to shorten. Use --topic.");
+      else if (job.status === "failed") process.exitCode = 1;
+      break;
+    }
     case "check":
       await check();
       break;
@@ -169,7 +183,7 @@ async function main() {
       await serve();
       break;
     default:
-      console.log('Commands: check | topics | make [--topic "..."] | inbox | demo | serve | connect-telegram');
+      console.log('Commands: check | topics | make [--topic "..."] | short [--topic "..."] | inbox | demo | serve | connect-telegram');
   }
 }
 
