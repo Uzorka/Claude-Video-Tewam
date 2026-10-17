@@ -10,7 +10,7 @@ export const TopicSchema = z.object({
 export const TopicListSchema = z.object({ topics: z.array(TopicSchema) });
 export type Topic = z.infer<typeof TopicSchema>;
 
-export const VISUAL_KINDS = ["broll", "product", "title", "stat", "list", "compare", "quote", "screenshot"] as const;
+export const VISUAL_KINDS = ["broll", "product", "process", "specs", "timeline", "title", "stat", "list", "compare", "quote", "screenshot"] as const;
 
 export const SceneSchema = z.object({
   id: z.string().describe("Short slug, unique within the video, e.g. 'hook' or 'price'"),
@@ -18,7 +18,7 @@ export const SceneSchema = z.object({
     .string()
     .describe("Exactly what the voice says in this scene. Spoken English, 1-4 sentences."),
   kind: z.enum(VISUAL_KINDS).describe(
-    "broll = full-screen stock video; product = a real photo of the product with its name on screen; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = scrolling capture of a public web page",
+    "broll = full-screen stock video of a GENERAL scene (never a specific product); product = the product's name presented on screen (with the owner's own photo if one exists); process = animated how-it-works diagram of 2-5 steps; specs = animated spec sheet; timeline = animated timeline of dated events; title = big kinetic headline; stat = one big number; list = 2-5 bullet points revealed one by one; compare = two columns side by side; quote = a quote with attribution; screenshot = scrolling capture of a public web page",
   ),
   broll_query: z
     .string()
@@ -43,10 +43,22 @@ export const SceneSchema = z.object({
     .nullable()
     .describe("For kind=compare: right column"),
   url: z.string().nullable().describe("For kind=screenshot: a public https URL to capture"),
+  steps: z
+    .array(z.object({ icon: z.string().describe("One emoji, e.g. 🔋 ⚙️ 🚀 📱"), label: z.string().describe("2-5 words") }))
+    .nullable()
+    .describe("For kind=process: 2-5 steps that explain how something works, in order"),
+  specs: z
+    .array(z.object({ label: z.string(), value: z.string() }))
+    .nullable()
+    .describe("For kind=specs: 3-6 rows, e.g. {label:'0-60 mph', value:'0.81 s'}"),
+  events: z
+    .array(z.object({ date: z.string().describe("e.g. '2017' or 'Oct 2026'"), label: z.string().describe("max 6 words") }))
+    .nullable()
+    .describe("For kind=timeline: 3-5 dated events in order"),
   product: z
     .string()
     .nullable()
-    .describe("The exact product this scene is about, e.g. 'iPhone 18 Pro' or 'Galaxy S26 Ultra'. Required for kind=product; also set it on other scenes about one specific product."),
+    .describe("The exact product this scene shows, e.g. 'iPhone 18 Pro'. Required for kind=product; null for scenes that don't show the product itself."),
 });
 export type Scene = z.infer<typeof SceneSchema>;
 
@@ -94,7 +106,7 @@ export type JobStatus =
   | "failed";
 
 /** A real image found for the topic (article hero images, Wikimedia Commons). */
-export type FoundImage = { url: string; source: string; credit: string };
+export type FoundImage = { url: string; source: string; credit: string; title?: string };
 
 export type Job = {
   id: string;

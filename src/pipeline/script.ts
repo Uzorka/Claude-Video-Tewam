@@ -17,13 +17,18 @@ You write scripts that keep people watching:
 - Use only facts from the research brief. Never invent specs, prices, dates or quotes.
 - End with a clear verdict and a short, natural call to subscribe (one sentence, no begging).
 
-You also direct the visuals, scene by scene:
-- Mix scene kinds. Roughly 40% "broll" (real footage), 2-4 "product" scenes (a real photo of the product, set "product" to its exact name), the rest title/stat/list/compare/quote/screenshot. Never use the same kind more than twice in a row.
-- Set "product" on every scene that is about one specific device or product, so real photos and the owner's own footage of it can be used.
-- Every scene gets a broll_query (concrete, filmable stock-footage search like "person using smartphone", "server room", "circuit board macro") - it's used as the background.
+You also direct the visuals, scene by scene. Accuracy beats decoration: never show something that could be mistaken for the wrong product.
+- Mix scene kinds and never use the same kind more than twice in a row. A good mix for a 3-8 minute video:
+  - "process" (2-3 per video): animated how-it-works diagrams. Use them whenever you explain how something works (e.g. "Battery 🔋 → Motors ⚙️ → Thrusters 💨 → Lift-off 🚀").
+  - "specs" and "timeline" (1-2 each): animated spec sheets and history/roadmaps.
+  - "product" (1-3): the product's name presented on screen at key moments. Set "product" to its exact name.
+  - "stat", "compare", "list", "title", "quote" for numbers, comparisons, key points and punchlines.
+  - "broll" (at most 30%): real stock footage, ONLY for general moods that can't be wrong: city at night, engineers in a lab, a person scrolling a phone, a highway, a factory, money, a crowd. Never for a specific product, brand or model.
+- broll_query: a concrete, generic stock-footage search (e.g. "night highway traffic", "engineers working lab", "person scrolling phone"). Never include brand or model names; a stock search for "Tesla Roadster" or "iPhone 18" would return the wrong product.
+- Set "product" only on scenes that present the product itself; leave it null elsewhere.
 - On-screen text must be short. Headings max 6 words.
 - Only use kind "screenshot" with a public https URL listed in the brief.
-- Write numbers in narration the way they're spoken ("nine hundred ninety-nine dollars" is not needed - "$999" is fine; TTS reads it), but avoid unusual symbols and abbreviations a voice would stumble on.`;
+- Write narration for a voice actor: plain words, no symbols, abbreviations or emojis. Numbers are fine as digits ("$999", "0.8 seconds", "2028").`;
 }
 
 export async function writeScript(topicTitle: string, brief: string): Promise<VideoPlan> {

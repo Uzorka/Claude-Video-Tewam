@@ -17,7 +17,7 @@ const BRIEF_FORMAT = `Write a research brief in Markdown with these sections:
 const imagesFrom = (articles: SourceArticle[]): FoundImage[] =>
   articles
     .filter((a) => a.image)
-    .map((a) => ({ url: a.image!, source: a.url, credit: new URL(a.url).hostname.replace(/^www\./, "") }));
+    .map((a) => ({ url: a.image!, source: a.url, credit: new URL(a.url).hostname.replace(/^www\./, ""), title: a.title }));
 
 /** Returns the research brief plus real images found on the source articles. */
 export async function researchTopic(topic: Topic): Promise<{ brief: string; images: FoundImage[] }> {
