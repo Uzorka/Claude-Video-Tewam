@@ -133,16 +133,32 @@ export const PageFocus: React.FC<{ scene: RenderScene; durationInFrames: number 
   );
 };
 
+/** Product photos cut out of a white studio backdrop are transparent PNGs. */
+export const isCutout = (photo: string | null | undefined) => Boolean(photo?.endsWith(".png"));
+
+/** A cut-out product floats with a soft shadow; a normal photo gets rounded corners and a drop shadow. */
+export const photoFrame = (cutout: boolean): React.CSSProperties =>
+  cutout ? { filter: "drop-shadow(0 40px 60px rgba(0,0,0,0.6))" } : { borderRadius: 24, boxShadow: "0 50px 140px rgba(0,0,0,0.65)" };
+
 /** Real product photo: sharp on a blurred copy of itself, slow push-in, name and credit. */
-export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed }) => {
+export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: number; fullBleed?: boolean }> = ({ scene, durationInFrames, fullBleed: wantFullBleed }) => {
   const frame = useCurrentFrame();
   const vertical = useVertical();
+  const cutout = isCutout(scene.photo);
+  const fullBleed = wantFullBleed && !cutout;
   const zoom = interpolate(frame, [0, durationInFrames], [1, 1.08]);
   const rise = interpolate(frame, [0, 14], [40, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
   const src = staticFile(scene.photo!);
   return (
     <AbsoluteFill style={{ backgroundColor: theme.bg, overflow: "hidden" }}>
-      <Img src={src} style={{ position: "absolute", inset: -60, width: "calc(100% + 120px)", height: "calc(100% + 120px)", objectFit: "cover", filter: fullBleed ? undefined : "blur(40px) brightness(0.45)", transform: `scale(${fullBleed ? zoom : 1.1})` }} />
+      {cutout ? (
+        <>
+          <Backdrop seed={3} />
+          <AbsoluteFill style={{ background: "radial-gradient(circle at 50% 52%, rgba(255,255,255,0.16), transparent 42%)" }} />
+        </>
+      ) : (
+        <Img src={src} style={{ position: "absolute", inset: -60, width: "calc(100% + 120px)", height: "calc(100% + 120px)", objectFit: "cover", filter: fullBleed ? undefined : "blur(40px) brightness(0.45)", transform: `scale(${fullBleed ? zoom : 1.1})` }} />
+      )}
       {fullBleed ? (
         <AbsoluteFill style={{ background: "linear-gradient(180deg, rgba(7,8,12,0.35) 0%, rgba(7,8,12,0) 40%, rgba(7,8,12,0.8) 100%)" }} />
       ) : (
@@ -153,8 +169,7 @@ export const ProductShot: React.FC<{ scene: RenderScene; durationInFrames: numbe
               maxWidth: "100%",
               maxHeight: "100%",
               objectFit: "contain",
-              borderRadius: 24,
-              boxShadow: "0 50px 140px rgba(0,0,0,0.65)",
+              ...photoFrame(cutout),
               transform: `translateY(${rise}px) scale(${zoom})`,
             }}
           />

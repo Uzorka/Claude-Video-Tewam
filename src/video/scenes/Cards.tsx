@@ -3,6 +3,7 @@ import { brandOf, coreWords, words } from "../../productName";
 import type { RenderScene } from "../../types";
 import { fadeIn, pop } from "../anim";
 import { useVertical } from "../layout";
+import { isCutout, photoFrame } from "../Background";
 import { FPS, theme } from "../theme";
 
 const Center: React.FC<{ children: React.ReactNode }> = ({ children }) => {
@@ -495,7 +496,12 @@ export const ProductReveal: React.FC<{ scene: RenderScene; durationInFrames: num
   const out = interpolate(local, [length - 8, length], [1, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
   return (
     <AbsoluteFill style={{ opacity: out, fontFamily: theme.font, color: theme.text }}>
-      <AbsoluteFill style={{ background: "rgba(7,8,12,0.78)", opacity: Math.min(1, p * 1.5) }} />
+      <AbsoluteFill
+        style={{
+          background: `radial-gradient(circle at 50% ${vertical ? 45 : 42}%, rgba(76,201,240,${isCutout(scene.photo) ? 0.22 : 0}), transparent 45%), rgba(7,8,12,0.82)`,
+          opacity: Math.min(1, p * 1.5),
+        }}
+      />
       <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: vertical ? "300px 60px 620px" : "120px 160px 200px", flexDirection: "column", gap: 34 }}>
         <Img
           src={staticFile(scene.photo!)}
@@ -503,8 +509,7 @@ export const ProductReveal: React.FC<{ scene: RenderScene; durationInFrames: num
             maxWidth: "100%",
             maxHeight: vertical ? 760 : 560,
             objectFit: "contain",
-            borderRadius: 26,
-            boxShadow: "0 40px 120px rgba(0,0,0,0.7)",
+            ...photoFrame(isCutout(scene.photo)),
             transform: `scale(${0.85 + p * 0.15}) translateY(${(1 - p) * 40}px)`,
             opacity: p,
           }}

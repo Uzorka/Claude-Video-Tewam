@@ -53,7 +53,8 @@ export async function officialPages(product: string): Promise<string[]> {
     }
   };
   const found: string[] = [];
-  for (const query of [`${product} official site`, `${product} newsroom press release`]) {
+  const core = coreWords(product).join(" ");
+  for (const query of [`${product} official site`, `site:${brand}.com ${core}`, `${product} newsroom press release`]) {
     for (const search of [bingWeb, duckDuckGo]) {
       try {
         const links = (await search(query)).filter(onBrandSite);
@@ -66,10 +67,10 @@ export async function officialPages(product: string): Promise<string[]> {
       }
     }
   }
-  return [...new Set(found)].slice(0, 4);
+  return [...new Set(found)].slice(0, 6);
 }
 
-type PageMedia = { title: string; images: { url: string; area: number; alt: string }[]; videos: string[] };
+type PageMedia = { title: string; images: { url: string; area: number; alt: string }[]; videos: string[]; links: { href: string; text: string }[] };
 
 /** Load each official page in a real browser and collect its big product images and videos. */
 export async function findOfficialMedia(product: string): Promise<OfficialMedia> {
@@ -89,7 +90,12 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
     const context = await browser.newContext({ userAgent: BROWSER_UA, locale: "en-US", viewport: { width: 1600, height: 1000 } });
     await context.addInitScript(NAME_SHIM);
     const page = await context.newPage();
-    for (const url of pages) {
+    const queue = [...pages];
+    const visited = new Set<string>();
+    for (let n = 0; queue.length && n < 8; n++) {
+      const url = queue.shift()!;
+      if (visited.has(url.replace(/[#?].*$/, ""))) continue;
+      visited.add(url.replace(/[#?].*$/, ""));
       try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: 40_000 });
         await page.waitForTimeout(2500);
@@ -118,11 +124,18 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
             .concat(Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href$='.mp4'], a[href*='.mp4?']")).map((a) => a.href))
             .filter((s) => s && /\.mp4(\?|$)/i.test(s) && !s.startsWith("blob:"));
           const h1 = document.querySelector("h1")?.textContent ?? "";
-          return { title: `${document.title} ${h1} ${meta("og:title")} ${location.pathname.replace(/[/_-]+/g, " ")}`, images, videos };
+          const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("a[href]")).map((a) => ({ href: a.href.split("#")[0], text: `${a.textContent ?? ""} ${a.getAttribute("aria-label") ?? ""}` }));
+          return { title: `${document.title} ${h1} ${meta("og:title")} ${location.pathname.replace(/[/_-]+/g, " ")}`, images, videos, links };
         });
-        // Only pages that are about this exact product.
+        // Only pages that are about this exact product. From a homepage or store page, follow its links to the product.
         if (!mentions(media.title, product)) {
-          console.log(`  · ${url}: not about ${product}, skipping`);
+          const host = new URL(url).hostname;
+          const next = media.links
+            .filter((l) => new URL(l.href).hostname === host && !visited.has(l.href) && (mentions(new URL(l.href).pathname.replace(/[/_-]+/g, " "), product) || mentions(l.text, product)))
+            .sort((a, b) => a.href.length - b.href.length)
+            .map((l) => l.href);
+          if (next.length) queue.unshift(...[...new Set(next)].slice(0, 2));
+          console.log(`  · ${url}: not about ${product}${next.length ? `, following ${next[0]}` : ", skipping"}`);
           continue;
         }
         result.site ??= url;
@@ -140,6 +153,8 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
   } finally {
     await browser.close();
   }
+  // Press b-roll (newsroom downloads) first: clean product shots without music or text.
+  result.videos.sort((a, b) => Number(/newsroom|press|download/i.test(b.url + b.source)) - Number(/newsroom|press|download/i.test(a.url + a.source)));
   result.images = result.images.slice(0, 6);
   result.videos = result.videos.slice(0, 3);
   console.log(`  ✓ ${product}: ${result.images.length} official images, ${result.videos.length} videos${result.site ? ` from ${result.site}` : ""}`);

@@ -253,8 +253,72 @@ async function wikimediaImages(query: string): Promise<FoundImage[]> {
   });
 }
 
-async function downloadImage(img: FoundImage, dir: string): Promise<string | null> {
+/**
+ * Studio packshots on plain white look pasted from a web page. Cut the product out (flood-fill the
+ * plain background from the edges, soft edge) so it floats on the video's own animated stage.
+ * Returns a transparent PNG, or null when the photo has a real background (those are kept as they are).
+ */
+export async function cutOut(file: string): Promise<string | null> {
+  const probe = (await run("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=width,height", "-of", "csv=p=0", file])).trim().split(",").map(Number);
+  const [W, H] = probe;
+  const raw = `${file}.rgba`;
+  await run("ffmpeg", ["-y", "-v", "error", "-i", file, "-f", "rawvideo", "-pix_fmt", "rgba", raw]);
+  const px = fs.readFileSync(raw);
+  fs.rmSync(raw, { force: true });
+  if (px.length !== W * H * 4) return null;
+
+  // Background colour = the average edge pixel; it must be light and even (a studio backdrop).
+  const edge: number[] = [];
+  for (let x = 0; x < W; x += 4) edge.push(x, (H - 1) * W + x);
+  for (let y = 0; y < H; y += 4) edge.push(y * W, y * W + W - 1);
+  const bg = [0, 1, 2].map((c) => edge.reduce((n, i) => n + px[i * 4 + c], 0) / edge.length);
+  const diff = (i: number) => Math.max(Math.abs(px[i * 4] - bg[0]), Math.abs(px[i * 4 + 1] - bg[1]), Math.abs(px[i * 4 + 2] - bg[2]));
+  const evenEdge = edge.filter((i) => diff(i) < 10).length / edge.length;
+  if (Math.min(...bg) < 215 || evenEdge < 0.9) return null;
+
+  // Flood-fill the backdrop from the edges with a tight tolerance, so a white product's own shading stops it.
+  const TOL = 9;
+  const isBg = new Uint8Array(W * H);
+  const stack = edge.filter((i) => diff(i) < TOL);
+  for (const i of stack) isBg[i] = 1;
+  while (stack.length) {
+    const i = stack.pop()!;
+    const x = i % W;
+    for (const j of [x > 0 ? i - 1 : -1, x < W - 1 ? i + 1 : -1, i - W, i + W]) {
+      if (j >= 0 && j < W * H && !isBg[j] && diff(j) < TOL) {
+        isBg[j] = 1;
+        stack.push(j);
+      }
+    }
+  }
+  const share = isBg.reduce((n, v) => n + v, 0) / (W * H);
+  if (share < 0.2 || share > 0.97) return null; // nothing to cut, or the product vanished
+
+  // Alpha: 0 on the backdrop, soft 2-px edge, crop to the product with a margin.
+  let [x0, y0, x1, y1] = [W, H, 0, 0];
+  for (let i = 0; i < W * H; i++) {
+    if (isBg[i]) {
+      px[i * 4 + 3] = 0;
+      continue;
+    }
+    const x = i % W;
+    const y = (i - x) / W;
+    const nearBg = (x > 0 && isBg[i - 1]) || (x < W - 1 && isBg[i + 1]) || (y > 0 && isBg[i - W]) || (y < H - 1 && isBg[i + W]);
+    if (nearBg) px[i * 4 + 3] = Math.min(255, Math.round((diff(i) / (TOL * 3)) * 255));
+    [x0, y0, x1, y1] = [Math.min(x0, x), Math.min(y0, y), Math.max(x1, x), Math.max(y1, y)];
+  }
+  const m = Math.round(Math.max(x1 - x0, y1 - y0) * 0.04);
+  [x0, y0, x1, y1] = [Math.max(0, x0 - m), Math.max(0, y0 - m), Math.min(W - 1, x1 + m), Math.min(H - 1, y1 + m)];
+  const out = file.replace(/\.jpg$/, ".png");
+  fs.writeFileSync(raw, px);
+  await run("ffmpeg", ["-y", "-v", "error", "-f", "rawvideo", "-pix_fmt", "rgba", "-s", `${W}x${H}`, "-i", raw, "-vf", `crop=${x1 - x0 + 1}:${y1 - y0 + 1}:${x0}:${y0}`, "-frames:v", "1", out]);
+  fs.rmSync(raw, { force: true });
+  return out;
+}
+
+export async function downloadImage(img: FoundImage, dir: string): Promise<string | null> {
   const file = path.join(dir, `${hash(img.url)}.jpg`);
+  if (fs.existsSync(file.replace(/\.jpg$/, ".png"))) return file.replace(/\.jpg$/, ".png");
   if (fs.existsSync(file)) return file;
   try {
     const raw = `${file}.src`;
@@ -269,23 +333,18 @@ async function downloadImage(img: FoundImage, dir: string): Promise<string | nul
       fs.rmSync(file, { force: true });
       return null; // logos and tiny icons aren't worth showing
     }
-    return file;
+    return (await cutOut(file).catch(() => null)) ?? file;
   } catch {
     return null;
   }
 }
 
-/** Official clips are re-encoded small and silent: max 20 s, 1080p, H.264. */
-async function downloadVideo(v: FoundImage, dir: string): Promise<{ file: string; duration: number } | null> {
+/** Official clips: 20 s from just after the opening (skips logos/black), re-encoded small and silent. ffmpeg reads only what it needs, even from huge 4K press files. */
+export async function downloadVideo(v: FoundImage, dir: string): Promise<{ file: string; duration: number } | null> {
   const file = path.join(dir, `${hash(v.url)}.mp4`);
   try {
     if (!fs.existsSync(file)) {
-      const head = await fetch(v.url, { method: "HEAD", headers: { "user-agent": BROWSER_UA }, signal: AbortSignal.timeout(15_000) });
-      if (Number(head.headers.get("content-length") ?? 0) > 150 * 1024 * 1024) return null;
-      const raw = `${file}.src`;
-      await download(v.url, raw, { "user-agent": BROWSER_UA });
-      await run("ffmpeg", ["-y", "-v", "error", "-i", raw, "-t", "20", "-an", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", file]);
-      fs.rmSync(raw, { force: true });
+      await run("ffmpeg", ["-y", "-v", "error", "-user_agent", BROWSER_UA, "-ss", "2", "-i", v.url, "-t", "20", "-an", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", file]);
     }
     const duration = Number((await run("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", file])).trim());
     if (!(duration >= 2)) {
