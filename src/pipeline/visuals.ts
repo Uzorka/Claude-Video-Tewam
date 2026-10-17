@@ -149,17 +149,34 @@ type WikiPage = {
   imageinfo?: { thumburl?: string; url: string; width: number; height: number; extmetadata?: Record<string, { value: string }> }[];
 };
 
+/** True when every word of the product name (e.g. "tesla", "roadster", "2") appears in the text. */
+function namesProduct(text: string, product: string) {
+  const words = new Set(text.toLowerCase().replace(/[^a-z0-9]+/g, " ").split(" "));
+  return product
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(" ")
+    .filter(Boolean)
+    .every((w) => words.has(w));
+}
+
+/**
+ * Third-party product photos (Wikimedia, news-article images) are OFF unless PRODUCT_PHOTOS=on:
+ * they're often the wrong model or generation, and article images belong to their publishers.
+ * Your own photos and clips are always used.
+ */
+const thirdPartyPhotos = () => (process.env.PRODUCT_PHOTOS ?? "").trim().toLowerCase() === "on";
+
 /** Freely licensed photos from Wikimedia Commons (no key needed). */
 async function wikimediaImages(query: string): Promise<FoundImage[]> {
   const url =
     "https://commons.wikimedia.org/w/api.php?action=query&format=json&generator=search&gsrnamespace=6&gsrlimit=10" +
     `&gsrsearch=${encodeURIComponent(`${query} filetype:bitmap`)}&prop=imageinfo&iiprop=url|size|extmetadata&iiurlwidth=1600`;
   const data = await getJson<{ query?: { pages: Record<string, WikiPage> } }>(url, { "user-agent": "ClaudeVideoTeam/1.0 (YouTube studio)" });
-  const first = query.toLowerCase().split(/\s+/)[0];
   return Object.values(data.query?.pages ?? {}).flatMap((p) => {
     const info = p.imageinfo?.[0];
-    // Must be landscape-ish, big enough, and actually named after the product.
-    if (!info || info.width < 900 || info.height > info.width * 1.2 || !p.title.toLowerCase().includes(first)) return [];
+    // Must be landscape-ish, big enough, and named after the exact product (every word of it).
+    if (!info || info.width < 900 || info.height > info.width * 1.2 || !namesProduct(p.title, query)) return [];
     const artist = info.extmetadata?.Artist?.value.replace(/<[^>]+>/g, "").trim() ?? "Unknown";
     const license = info.extmetadata?.LicenseShortName?.value ?? "";
     return [{ url: info.thumburl ?? info.url, source: `https://commons.wikimedia.org/wiki/${encodeURIComponent(p.title)}`, credit: `${artist}, ${license} via Wikimedia Commons` }];
@@ -234,9 +251,11 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
         console.log(`  ✗ ${(e as Error).message}`);
       }
     }
-    if (!scene.product) continue;
+    if (!scene.product || !thirdPartyPhotos()) continue;
+    // News photos come first (they show the current model); only articles that name the exact product.
+    const fromArticles = articlePool.filter((img) => namesProduct(img.title ?? "", scene.product!));
     if (!wikiCache.has(scene.product)) wikiCache.set(scene.product, await wikimediaImages(scene.product).catch(() => []));
-    for (const img of [...wikiCache.get(scene.product)!, ...articlePool]) {
+    for (const img of [...fromArticles, ...wikiCache.get(scene.product)!]) {
       if (usedImages.has(img.url)) continue;
       usedImages.add(img.url);
       const file = await downloadImage(img, dir);

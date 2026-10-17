@@ -3,7 +3,7 @@ import type { RenderProps, RenderScene } from "../types";
 import { fadeIn } from "./anim";
 import { Backdrop, Footage, PageScroll, ProductShot } from "./Background";
 import { Captions } from "./Captions";
-import { CompareCard, ListCard, LowerThird, QuoteCard, StatCard, TitleCard } from "./scenes/Cards";
+import { CompareCard, ListCard, LowerThird, ProcessCard, ProductSpotlight, QuoteCard, SpecsCard, StatCard, TimelineCard, TitleCard } from "./scenes/Cards";
 import { FPS, theme } from "./theme";
 
 const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: number }> = ({ scene, index, durationInFrames }) => {
@@ -36,7 +36,16 @@ const Scene: React.FC<{ scene: RenderScene; index: number; durationInFrames: num
       foreground = isBroll || scene.photo ? <LowerThird scene={scene} /> : <TitleCard scene={scene} />;
       break;
     case "product":
-      foreground = <LowerThird scene={{ ...scene, heading: scene.heading ?? scene.product }} />;
+      foreground = scene.photo ? <LowerThird scene={{ ...scene, heading: scene.heading ?? scene.product }} /> : <ProductSpotlight scene={scene} />;
+      break;
+    case "process":
+      foreground = <ProcessCard scene={scene} durationInFrames={durationInFrames} />;
+      break;
+    case "specs":
+      foreground = <SpecsCard scene={scene} durationInFrames={durationInFrames} />;
+      break;
+    case "timeline":
+      foreground = <TimelineCard scene={scene} durationInFrames={durationInFrames} />;
       break;
   }
 

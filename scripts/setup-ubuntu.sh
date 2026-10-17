@@ -8,7 +8,7 @@ step() { printf '\n\033[1;36m▶ %s\033[0m\n' "$1"; }
 
 step "1/5 Installing system tools (you may be asked for your computer password)"
 sudo apt-get update -qq
-sudo apt-get install -y -qq curl git ffmpeg ca-certificates > /dev/null
+sudo apt-get install -y -qq curl git ffmpeg fonts-noto-color-emoji ca-certificates > /dev/null
 if ! command -v node > /dev/null || [ "$(node -p 'process.versions.node.split(".")[0]')" -lt 20 ]; then
   curl -fsSL https://deb.nodesource.com/setup_22.x | sudo -E bash - > /dev/null
   sudo apt-get install -y -qq nodejs > /dev/null

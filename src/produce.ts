@@ -35,7 +35,8 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
   const articleImages: FoundImage[] = fs.existsSync(imagesFile) ? JSON.parse(fs.readFileSync(imagesFile, "utf8")) : [];
   const real = await fetchRealVisuals(job.id, plan.scenes, articleImages);
   // Your own clips win; stock footage fills the remaining scenes.
-  const stock = await fetchBroll(job.id, plan.scenes.filter((s) => !real.videos[s.id]), durations);
+  // Stock footage only for general mood shots: a stock search for a specific product returns the wrong one.
+  const stock = await fetchBroll(job.id, plan.scenes.filter((s) => !real.videos[s.id] && !s.product), durations);
   const broll = { ...stock, ...real.videos };
   const shots = await captureScreenshots(job.id, plan.scenes);
   saveText(job.id, "credits.txt", real.credits.join("\n"));
@@ -43,7 +44,10 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
   const scenes: RenderScene[] = plan.scenes.map((s) => {
     let kind = s.kind;
     if (kind === "screenshot" && !shots[s.id]) kind = "title";
-    if (kind === "product" && !real.photos[s.id]) kind = "title";
+    // Empty animated scenes fall back to a headline instead of showing nothing.
+    if (kind === "process" && !s.steps?.length) kind = "title";
+    if (kind === "specs" && !s.specs?.length) kind = "title";
+    if (kind === "timeline" && !s.events?.length) kind = "title";
     return {
       ...s,
       kind,
