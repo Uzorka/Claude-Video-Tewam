@@ -54,7 +54,7 @@ export async function officialPages(product: string): Promise<string[]> {
   };
   const found: string[] = [];
   const core = coreWords(product).join(" ");
-  for (const query of [`${product} official site`, `site:${brand}.com ${core}`, `${product} newsroom press release`]) {
+  for (const query of [`${product} official site`, `site:${brand}.com ${core}`, `site:${brand}.com/newsroom ${core}`, `${product} newsroom press release`]) {
     for (const search of [bingWeb, duckDuckGo]) {
       try {
         const links = (await search(query)).filter(onBrandSite);
@@ -69,6 +69,8 @@ export async function officialPages(product: string): Promise<string[]> {
   }
   return [...new Set(found)].slice(0, 6);
 }
+
+const PRESS = /newsroom|press|media-?(center|kit|library)|b-?roll|downloads?\b/i;
 
 type PageMedia = { title: string; images: { url: string; area: number; alt: string }[]; videos: string[]; links: { href: string; text: string }[] };
 
@@ -145,10 +147,13 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
         }
         result.site ??= url;
         const credit = `${company} (official)`;
-        for (const img of media.images.sort((a, b) => b.area - a.area).filter((i) => !otherModel(i.alt, product))) {
+        // Photos captioned with the product's name first, then the page's share image, then the biggest.
+        const named = (i: { alt: string }) => Number(mentions(i.alt, product));
+        for (const img of media.images.sort((a, b) => named(b) - named(a) || b.area - a.area).filter((i) => !otherModel(i.alt, product))) {
           if (!result.images.some((i) => i.url === img.url)) result.images.push({ url: img.url, source: url, credit, title: img.alt });
         }
-        for (const v of new Set(media.videos)) {
+        // Only press/newsroom clips: product-page videos are often abstract animations, not the product.
+        for (const v of new Set(media.videos.filter((v) => PRESS.test(`${v} ${url}`)))) {
           if (!result.videos.some((i) => i.url === v)) result.videos.push({ url: v, source: url, credit });
         }
       } catch (e) {
@@ -158,8 +163,6 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
   } finally {
     await browser.close();
   }
-  // Press b-roll (newsroom downloads) first: clean product shots without music or text.
-  result.videos.sort((a, b) => Number(/newsroom|press|download/i.test(b.url + b.source)) - Number(/newsroom|press|download/i.test(a.url + a.source)));
   result.images = result.images.slice(0, 6);
   result.videos = result.videos.slice(0, 3);
   console.log(`  ✓ ${product}: ${result.images.length} official images, ${result.videos.length} videos${result.site ? ` from ${result.site}` : ""}`);
