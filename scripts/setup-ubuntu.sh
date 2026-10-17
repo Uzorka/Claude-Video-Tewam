@@ -27,6 +27,8 @@ step "3/5 Installing the studio (takes a few minutes)"
 npm install --no-audit --no-fund --loglevel=error
 npx playwright-core install --with-deps chromium > /dev/null
 npx remotion browser ensure > /dev/null
+# yt-dlp: only used when YouTube clips are switched on (/ytclips on)
+sudo curl -fsSL -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && sudo chmod +x /usr/local/bin/yt-dlp || echo "(yt-dlp not installed; YouTube clips won't work)"
 
 step "4/5 Your keys (paste each one and press Enter; they stay on this computer)"
 touch .env

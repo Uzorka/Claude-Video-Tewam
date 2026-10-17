@@ -71,6 +71,8 @@ export type StudioSettings = {
   /** "auto" = ElevenLabs while credits last, then the free Kokoro voice. "kokoro" = always Kokoro. */
   voiceEngine?: "auto" | "kokoro";
   kokoroVoice?: string;
+  /** Short muted clips from the maker's official YouTube channel (off unless switched on). */
+  ytClips?: boolean;
 };
 const SETTINGS_FILE = path.join(STATE_DIR, "settings.json");
 
