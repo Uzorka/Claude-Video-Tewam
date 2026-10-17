@@ -1,0 +1,22 @@
+{
+  "id": "2026-10-17-pixel-11",
+  "createdAt": "2026-10-17T14:45:54.561Z",
+  "updatedAt": "2026-10-17T14:47:52.164Z",
+  "status": "failed",
+  "topic": {
+    "title": "pixel 11",
+    "angle": "As requested by the channel owner.",
+    "why_now": "Requested directly by the channel owner.",
+    "score": 100,
+    "source_urls": []
+  },
+  "version": 1,
+  "feedback": [],
+  "reviewMessageIds": [
+    59
+  ],
+  "releaseTag": null,
+  "fullVideoUrl": null,
+  "youtubeId": null,
+  "error": "ElevenLabs rejected the API key. Check ELEVENLABS_API_KEY."
+}

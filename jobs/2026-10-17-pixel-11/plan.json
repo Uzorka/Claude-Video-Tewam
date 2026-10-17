@@ -1,0 +1,209 @@
+{
+  "title": "Google Pixel 11 Review: Don't Pay Full Price!",
+  "alt_titles": [
+    "Pixel 11 Pro Fold Review: The End of an Era?",
+    "Why Google Is Already Discounting the Pixel 11",
+    "Pixel 11 Pro & Fold: Honest Impressions"
+  ],
+  "thumbnail_text": "WAIT FOR DISCOUNTS",
+  "description": "Google released the Pixel 11 series and Pixel 11 Pro Fold with Tensor G6 and brighter screens, but is it worth the $1,899 price tag?\n\nSources:\n- https://blog.google/products-and-platforms/devices/pixel/pixel-11-pro-fold/\n- https://www.theverge.com/tech/981956/google-pixel-11-pro-fold-review\n- https://www.droid-life.com/2026/10/14/google-quietly-sent-out-30-off-pixel-11-codes-today/\n- https://www.droid-life.com/2026/10/13/arc-pulse-pixel-11-pro-review/",
+  "tags": [
+    "Google Pixel 11",
+    "Pixel 11 Pro",
+    "Pixel 11 Pro Fold",
+    "Tensor G6",
+    "Google Pixel Review",
+    "Tech Review",
+    "Foldable Smartphone",
+    "Android 17"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Google just raised the price of their flagship foldable to $1,899, and almost immediately started sending out secret 30% discount codes. By the end of this video, you'll know exactly whether the Pixel 11 lineup is worth your money, or if you should wait for the price to drop even further.",
+      "kind": "title",
+      "broll_query": "smartphone on dark table",
+      "heading": "Pixel 11 Reality Check",
+      "subheading": "Big prices and instant discounts",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": null
+    },
+    {
+      "id": "lineup-overview",
+      "narration": "The full family consists of the standard Pixel 11, the 11 Pro, the 11 Pro XL, and the headlining Pixel 11 Pro Fold. All of them are running Google's new Tensor G6 processor, built specifically around Gemini AI intelligence.",
+      "kind": "product",
+      "broll_query": "holding flagship smartphone",
+      "heading": "Google Pixel 11 Series",
+      "subheading": "Powered by Tensor G6",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro"
+    },
+    {
+      "id": "fold-pricing",
+      "narration": "But the Fold is where things get controversial. It starts at $1,899 for 256GB of storage—a $100 price hike over last year without giving you a single extra gigabyte out of the box.",
+      "kind": "stat",
+      "broll_query": "person holding premium smartphone",
+      "heading": "Fold Price Increase",
+      "subheading": "256GB baseline storage",
+      "stat_value": "$1,899",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "early-discounts",
+      "narration": "Yet within weeks of launch, Google quietly sent 30% promo codes to Google AI Pro subscribers. That cuts up to $570 off the Fold and knocks $250 to $390 off the regular Pro models.",
+      "kind": "screenshot",
+      "broll_query": "browsing web on phone",
+      "heading": "Quiet 30% Promo Codes",
+      "subheading": "Immediate price cuts spotted",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://www.droid-life.com/2026/10/14/google-quietly-sent-out-30-off-pixel-11-codes-today/",
+      "product": "Pixel 11"
+    },
+    {
+      "id": "crease-hardware",
+      "narration": "So what are you actually buying? Google gave the Fold a redesigned gearless hinge with a larger bend radius. But if you were hoping for a crease-free screen, you won't find it here; the fold is still clearly visible head-on and unmistakable under your thumb.",
+      "kind": "broll",
+      "broll_query": "folding smartphone display crease",
+      "heading": "The Crease Remains",
+      "subheading": "Redesigned gearless hinge",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "competitor-context",
+      "narration": "In fact, reviewers weren't shy about calling Google out. While rivals like Samsung, Oppo, and Honor push ultra-thin chassis and silicon-carbon cells, Google's design feels stubbornly thick and boxy.",
+      "kind": "quote",
+      "broll_query": "modern glass smartphone reflection",
+      "heading": "The end of an era",
+      "subheading": "The Verge Hardware Review",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "battery-dimensions",
+      "narration": "Google did shave off 19 grams and roughly 1 millimeter of thickness. But to do that without silicon-carbon tech, they actually shrank the battery down to 4,806mAh. You'll still get through a standard day, but don't expect a two-day battery.",
+      "kind": "compare",
+      "broll_query": "measuring thin smartphone caliber",
+      "heading": "Battery Capacity vs Slimness",
+      "subheading": "Trading capacity for grams",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "Pixel 10 Pro Fold",
+        "points": [
+          "5,015mAh battery",
+          "Heavier frame",
+          "Thicker profile"
+        ]
+      },
+      "right": {
+        "label": "Pixel 11 Pro Fold",
+        "points": [
+          "4,806mAh battery",
+          "19g lighter chassis",
+          "0.7 to 1mm thinner"
+        ]
+      },
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "display-durability",
+      "narration": "On the bright side, the displays are genuinely stunning. Both inner and outer screens peak at 3,600 nits, making outdoor glare a non-issue. Plus, with full IP68 water resistance and a glass-fiber composite back, this is one of the toughest foldables built.",
+      "kind": "product",
+      "broll_query": "outdoor sunlight phone screen",
+      "heading": "3,600-Nit Peak Brightness",
+      "subheading": "Durable IP68 composite back",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "hilight-feature",
+      "narration": "Then there's HiLight—a notification LED ring wrapped around the camera visor. It sounds cool until you realize it only triggers when your phone is face-down on a desk with the screen off, limited to just five colors and favorite contacts.",
+      "kind": "broll",
+      "broll_query": "camera visor glowing led",
+      "heading": "HiLight Visor Gimmick",
+      "subheading": "Only works face-down",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "software-features",
+      "narration": "Where Google shines is software. Android 17 introduces Bubbles, docking background apps in the lower corner for easy multitasking. And their new sign-to-text accessibility feature translates American Sign Language straight through the front camera in real time.",
+      "kind": "list",
+      "broll_query": "multitasking apps on tablet",
+      "heading": "Key Android 17 Features",
+      "subheading": "Smart foldable multitasking",
+      "stat_value": null,
+      "items": [
+        "Multitasking floating Bubbles",
+        "Sign-to-Text translation",
+        "25W Qi2 wireless charging",
+        "Up to 30x Super Zoom"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro Fold"
+    },
+    {
+      "id": "camera-system",
+      "narration": "The cameras remain standard Pixel excellence. You get a larger 48-megapixel main sensor, up to 30x Super Zoom on the telephoto, and improved Magic Capture processing. It's reliable, sharp, and effortless to shoot with.",
+      "kind": "broll",
+      "broll_query": "taking photo with smartphone",
+      "heading": "48MP Main Sensor",
+      "subheading": "Consistent photo performance",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": "Pixel 11 Pro"
+    },
+    {
+      "id": "verdict",
+      "narration": "Here's the bottom line. The Pixel 11 family has great displays, solid cameras, and top-tier durability. But charging $1,899 for a foldable with an obvious crease and a shrunken battery is a tough sell. Don't pay full price—wait for the discounts that Google is already sending out. If you enjoyed this breakdown, hit subscribe for more honest tech reviews.",
+      "kind": "title",
+      "broll_query": "modern office tech desk",
+      "heading": "The Final Verdict",
+      "subheading": "Wait for the discount",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "product": null
+    }
+  ]
+}
