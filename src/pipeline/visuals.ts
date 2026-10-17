@@ -1,3 +1,4 @@
+import { execFile } from "node:child_process";
 import crypto from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
@@ -275,9 +276,9 @@ export async function cutOut(file: string): Promise<string | null> {
   const diff = (i: number) => Math.max(Math.abs(px[i * 4] - bg[0]), Math.abs(px[i * 4 + 1] - bg[1]), Math.abs(px[i * 4 + 2] - bg[2]));
   const evenEdge = edge.filter((i) => diff(i) < 10).length / edge.length;
   if (Math.min(...bg) < 215 || evenEdge < 0.9) return null;
+  const TOL = 9;
 
   // Flood-fill the backdrop from the edges with a tight tolerance, so a white product's own shading stops it.
-  const TOL = 9;
   const isBg = new Uint8Array(W * H);
   const stack = edge.filter((i) => diff(i) < TOL);
   for (const i of stack) isBg[i] = 1;
@@ -293,6 +294,8 @@ export async function cutOut(file: string): Promise<string | null> {
   }
   const share = isBg.reduce((n, v) => n + v, 0) / (W * H);
   if (share < 0.2 || share > 0.97) return null; // nothing to cut, or the product vanished
+  // The product must sit inside the frame: if it still touches the edges a lot, the cut went wrong.
+  if (edge.filter((i) => !isBg[i]).length / edge.length > 0.06) return null;
 
   // Alpha: 0 on the backdrop, soft 2-px edge, crop to the product with a margin.
   let [x0, y0, x1, y1] = [W, H, 0, 0];
@@ -316,6 +319,28 @@ export async function cutOut(file: string): Promise<string | null> {
   return out;
 }
 
+/** Average brightness of the photo's outer edge (0-255): high = a plain white page-style backdrop. */
+async function edgeBrightness(file: string) {
+  const raw = await new Promise<Buffer>((resolve, reject) =>
+    execFile("ffmpeg", ["-v", "error", "-i", file, "-vf", "scale=32:32,format=gray", "-f", "rawvideo", "-"], { encoding: "buffer", maxBuffer: 1 << 20 }, (e, out) => (e ? reject(e) : resolve(out))),
+  );
+  const edge = [...Array(32).keys()].flatMap((k) => [raw[k], raw[31 * 32 + k], raw[k * 32], raw[k * 32 + 31]]);
+  return edge.reduce((n, v) => n + v, 0) / edge.length;
+}
+
+/** Tiny greyscale thumbnail, to spot the same picture published under two addresses. */
+export async function fingerprint(file: string) {
+  return new Promise<Buffer>((resolve, reject) =>
+    execFile("ffmpeg", ["-v", "error", "-i", file, "-vf", "scale=12:12,format=gray", "-f", "rawvideo", "-"], { encoding: "buffer", maxBuffer: 1 << 20 }, (e, out) => (e ? reject(e) : resolve(out))),
+  );
+}
+export const samePicture = (a: Buffer, b: Buffer) => a.length === b.length && a.reduce((n, v, i) => n + Math.abs(v - b[i]), 0) / a.length < 10;
+
+/**
+ * Download a product photo. Plain-white studio shots are cut out onto a transparent background;
+ * photos that keep a white page-like backdrop (close-ups cropped at the edge) are dropped, since they
+ * look like a screen grab. Photos with a real scene behind the product are kept as they are.
+ */
 export async function downloadImage(img: FoundImage, dir: string): Promise<string | null> {
   const file = path.join(dir, `${hash(img.url)}.jpg`);
   if (fs.existsSync(file.replace(/\.jpg$/, ".png"))) return file.replace(/\.jpg$/, ".png");
@@ -333,21 +358,28 @@ export async function downloadImage(img: FoundImage, dir: string): Promise<strin
       fs.rmSync(file, { force: true });
       return null; // logos and tiny icons aren't worth showing
     }
-    return (await cutOut(file).catch(() => null)) ?? file;
+    const png = await cutOut(file).catch(() => null);
+    if (png) return png;
+    if ((await edgeBrightness(file)) > 200) {
+      fs.rmSync(file, { force: true });
+      return null;
+    }
+    return file;
   } catch {
     return null;
   }
 }
 
-/** Official clips: 20 s from just after the opening (skips logos/black), re-encoded small and silent. ffmpeg reads only what it needs, even from huge 4K press files. */
+/** Official clips: the first 20 s, re-encoded small and silent. ffmpeg reads only what it needs, even from huge 4K press files. */
 export async function downloadVideo(v: FoundImage, dir: string): Promise<{ file: string; duration: number } | null> {
   const file = path.join(dir, `${hash(v.url)}.mp4`);
   try {
     if (!fs.existsSync(file)) {
-      await run("ffmpeg", ["-y", "-v", "error", "-user_agent", BROWSER_UA, "-ss", "2", "-i", v.url, "-t", "20", "-an", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", file]);
+      await run("ffmpeg", ["-y", "-v", "error", "-user_agent", BROWSER_UA, "-i", v.url, "-t", "20", "-an", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "23", "-pix_fmt", "yuv420p", file]);
     }
     const duration = Number((await run("ffprobe", ["-v", "error", "-show_entries", "format=duration", "-of", "default=nw=1:nk=1", file])).trim());
     if (!(duration >= 2)) {
+      console.log(`  ✗ video ${v.url}: too short (${duration || 0}s)`);
       fs.rmSync(file, { force: true });
       return null;
     }
@@ -394,9 +426,14 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
   async function photosOf(product: string) {
     if (gallery.has(product)) return gallery.get(product)!;
     const list: { file: string; credit: string | null; source: string }[] = [];
+    const prints: Buffer[] = [];
     const add = async (img: FoundImage) => {
       const file = await downloadImage(img, dir);
-      if (file && !list.some((l) => l.file === publicPath(file))) list.push({ file: publicPath(file), credit: img.credit, source: img.source });
+      if (!file) return;
+      const print = await fingerprint(file).catch(() => null);
+      if (print && prints.some((p) => samePicture(p, print))) return;
+      if (print) prints.push(print);
+      list.push({ file: publicPath(file), credit: img.credit, source: img.source });
     };
     for (const img of (await officialFor(product)).images) {
       if (list.length >= 3) break;

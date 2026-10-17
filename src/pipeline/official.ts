@@ -1,6 +1,6 @@
 import type { FoundImage } from "../types.js";
 import { config } from "../config.js";
-import { brandOf, coreWords, mentions } from "../productName.js";
+import { brandOf, coreWords, mentions, otherModel } from "../productName.js";
 
 /**
  * Official product media: press/marketing photos and clips the maker publishes on its own website
@@ -90,11 +90,12 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
     const context = await browser.newContext({ userAgent: BROWSER_UA, locale: "en-US", viewport: { width: 1600, height: 1000 } });
     await context.addInitScript(NAME_SHIM);
     const page = await context.newPage();
-    const queue = [...pages];
+    // The usual product page address first (apple.com/homepod, apple.com/iphone-17-pro), then search results.
+    const queue = [`https://www.${brandOf(product)}.com/${coreWords(product).join("-")}/`, ...pages];
     const visited = new Set<string>();
     for (let n = 0; queue.length && n < 8; n++) {
       const url = queue.shift()!;
-      if (visited.has(url.replace(/[#?].*$/, ""))) continue;
+      if (visited.has(url.replace(/[#?].*$/, "")) || /support|applecare|account\./i.test(url)) continue;
       visited.add(url.replace(/[#?].*$/, ""));
       try {
         await page.goto(url, { waitUntil: "domcontentloaded", timeout: 40_000 });
@@ -128,10 +129,14 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
           return { title: `${document.title} ${h1} ${meta("og:title")} ${location.pathname.replace(/[/_-]+/g, " ")}`, images, videos, links };
         });
         // Only pages that are about this exact product. From a homepage or store page, follow its links to the product.
-        if (!mentions(media.title, product)) {
+        if (!mentions(media.title, product) || otherModel(new URL(page.url()).pathname, product)) {
           const host = new URL(url).hostname;
           const next = media.links
-            .filter((l) => new URL(l.href).hostname === host && !visited.has(l.href) && (mentions(new URL(l.href).pathname.replace(/[/_-]+/g, " "), product) || mentions(l.text, product)))
+            .filter((l) => {
+              const u = new URL(l.href);
+              const about = mentions(u.pathname.replace(/[/_-]+/g, " "), product) || mentions(l.text, product);
+              return u.hostname === host && !visited.has(l.href.replace(/[#?].*$/, "")) && about && !otherModel(u.pathname, product) && !/support|applecare|account|login|sign/i.test(l.href);
+            })
             .sort((a, b) => a.href.length - b.href.length)
             .map((l) => l.href);
           if (next.length) queue.unshift(...[...new Set(next)].slice(0, 2));
@@ -140,7 +145,7 @@ export async function findOfficialMedia(product: string): Promise<OfficialMedia>
         }
         result.site ??= url;
         const credit = `${company} (official)`;
-        for (const img of media.images.sort((a, b) => b.area - a.area)) {
+        for (const img of media.images.sort((a, b) => b.area - a.area).filter((i) => !otherModel(i.alt, product))) {
           if (!result.images.some((i) => i.url === img.url)) result.images.push({ url: img.url, source: url, credit, title: img.alt });
         }
         for (const v of new Set(media.videos)) {

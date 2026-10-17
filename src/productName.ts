@@ -41,3 +41,12 @@ export function mentions(text: string, product: string) {
   return core.length > 0 && core.every((w) => flat.includes(` ${w} `) || (w.length >= 5 && joined.includes(w)));
 }
 
+
+// Words that mark a different model in the same family: "HomePod mini" is not the "HomePod".
+const VARIANTS = ["mini", "pro", "max", "plus", "ultra", "air", "lite", "se", "fe", "fold", "flip", "xl", "studio", "neo"];
+
+/** True when the text (a page address or photo caption) names a sibling model rather than this product. */
+export function otherModel(text: string, product: string) {
+  const mine = new Set(words(product));
+  return words(text).some((w) => VARIANTS.includes(w) && !mine.has(w));
+}
