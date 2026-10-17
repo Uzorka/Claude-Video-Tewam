@@ -7,6 +7,43 @@ import { jobMediaDir } from "../jobs.js";
 import type { Scene, WordTiming } from "../types.js";
 import { probeDuration, publicPath, run } from "./media.js";
 
+/** Turn ElevenLabs' error reply into a clear message (it uses 401 for several different problems). */
+function elevenLabsError(status: number, body: string): Error {
+  let detail = "";
+  try {
+    const parsed = JSON.parse(body) as { detail?: unknown };
+    detail = typeof parsed.detail === "string" ? parsed.detail : JSON.stringify(parsed.detail ?? parsed);
+  } catch {
+    detail = body;
+  }
+  if (status === 402 || /paid_plan_required|payment_required/.test(body)) return new PaidVoiceError();
+  if (/quota_exceeded/.test(body)) return new Error("Your ElevenLabs credits for this month are used up. They reset monthly, or you can upgrade your plan.");
+  if (/unusual_activity|detected_unusual/.test(body))
+    return new Error(
+      "ElevenLabs blocked its free plan from this computer ('unusual activity'). The free plan often refuses cloud servers like GitHub and VPNs. Fix: make videos from your laptop, or upgrade ElevenLabs to Starter (about $5/month).",
+    );
+  if (/invalid_api_key|api.key/i.test(detail)) return new Error("ElevenLabs says the API key is invalid. Check ELEVENLABS_API_KEY.");
+  return new Error(`ElevenLabs said (${status}): ${detail.slice(0, 300)}`);
+}
+
+/** How many voice characters are left this month (null if unknown). */
+export type Credits = { error: string } | { tier: string; used: number; limit: number; resets: string | null };
+export async function elevenLabsCredits(): Promise<Credits> {
+  try {
+    const res = await fetch("https://api.elevenlabs.io/v1/user/subscription", { headers: { "xi-api-key": config.elevenlabs.apiKey } });
+    if (!res.ok) return { error: elevenLabsError(res.status, await res.text()).message };
+    const d = (await res.json()) as { tier: string; character_count: number; character_limit: number; next_character_count_reset_unix?: number };
+    return {
+      tier: d.tier,
+      used: d.character_count,
+      limit: d.character_limit,
+      resets: d.next_character_count_reset_unix ? new Date(d.next_character_count_reset_unix * 1000).toISOString().slice(0, 10) : null,
+    };
+  } catch (e) {
+    return { error: (e as Error).message };
+  }
+}
+
 /** A premade ElevenLabs voice ("Brian") that works on the free plan. */
 const FREE_FALLBACK_VOICE = "nPczCjzI2devNBz1zQrb";
 
@@ -67,10 +104,7 @@ async function elevenLabs(text: string, previous: string, next: string, outFile:
       await new Promise((r) => setTimeout(r, 2000 * attempt));
       continue;
     }
-    if (res.status === 402 || /paid_plan_required|payment_required/.test(body)) throw new PaidVoiceError();
-    if (res.status === 401) throw new Error("ElevenLabs rejected the API key. Check ELEVENLABS_API_KEY.");
-    if (/quota_exceeded/.test(body)) throw new Error("Your ElevenLabs credits for this month are used up. Wait for the monthly reset or upgrade.");
-    throw new Error(`ElevenLabs error ${res.status}: ${body.slice(0, 300)}`);
+    throw elevenLabsError(res.status, body);
   }
 }
 

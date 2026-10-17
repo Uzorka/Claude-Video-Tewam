@@ -1,9 +1,9 @@
 import { config, requireKeys, saveEnv } from "./config.js";
-import { createJob, readState, writeState } from "./jobs.js";
-import { demoPlan } from "./demo.js";
+import { readState, writeState } from "./jobs.js";
 import { processInbox } from "./inbox.js";
 import { scoutTopics } from "./pipeline/trends.js";
-import { makeVideo, produceAndReview, retryBusyJobs } from "./produce.js";
+import { elevenLabsCredits } from "./pipeline/voice.js";
+import { makeDemo, makeVideo, retryBusyJobs } from "./produce.js";
 import { esc, sendMessage } from "./telegram.js";
 import type { Topic } from "./types.js";
 
@@ -44,6 +44,10 @@ async function check() {
       headers: { "x-goog-api-key": config.gemini.apiKey },
     });
     console.log(res.ok ? `\n🧠 Gemini key works (model: ${config.gemini.model}).` : `\n❌ Gemini rejected the key or model (${res.status}): ${(await res.text()).slice(0, 200)}`);
+  }
+  if (config.elevenlabs.apiKey) {
+    const c = await elevenLabsCredits();
+    console.log("error" in c ? `\n❌ ElevenLabs: ${c.error}` : `\n🎙️ ElevenLabs ${c.tier} plan: ${c.used} of ${c.limit} characters used this month (resets ${c.resets ?? "?"}).`);
   }
   if (config.elevenlabs.apiKey) {
     const res = await fetch("https://api.elevenlabs.io/v1/voices", { headers: { "xi-api-key": config.elevenlabs.apiKey } });
@@ -152,11 +156,9 @@ async function main() {
       await processInbox();
       await retryBusyJobs();
       break;
-    case "demo": {
-      const job = createJob({ title: "Demo video", angle: "Style preview", why_now: "Testing the studio", score: 0, source_urls: [] });
-      await produceAndReview(job, demoPlan);
+    case "demo":
+      await makeDemo();
       break;
-    }
     case "check":
       await check();
       break;
