@@ -1,7 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { readSettings } from "../config.js";
-import { brandOf, mentions, otherModel } from "../productName.js";
+import { brandOf, coreWords, mentions, otherModel } from "../productName.js";
 import type { FoundImage } from "../types.js";
 import { run } from "./media.js";
 
@@ -37,6 +37,12 @@ const CHANNELS: Record<string, string[]> = {
   dji: ["dji"],
 };
 
+// Official channel handles, searched first (a general search buries brand videos under reviews).
+const HANDLES: Record<string, string> = {
+  apple: "@Apple", google: "@madebygoogle", samsung: "@Samsung", microsoft: "@Microsoft", sony: "@Sony", openai: "@OpenAI",
+  anthropic: "@anthropic-ai", tesla: "@tesla", meta: "@Meta", amazon: "@amazon", nvidia: "@NVIDIA", oneplus: "@OnePlus", xiaomi: "@Xiaomi", dji: "@DJI",
+};
+
 type Entry = { id: string; title?: string; channel?: string; uploader?: string; duration?: number; channel_is_verified?: boolean };
 
 const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...args]);
@@ -46,8 +52,20 @@ export async function officialYouTubeVideos(product: string): Promise<{ id: stri
   const brand = brandOf(product);
   if (!brand) return [];
   const names = CHANNELS[brand] ?? [brand];
-  const out = await ytdlp(["--flat-playlist", "--dump-json", `ytsearch20:${product}`]);
-  const entries = out.split("\n").filter(Boolean).map((l) => JSON.parse(l) as Entry);
+  const parse = (out: string) => out.split("\n").filter(Boolean).map((l) => JSON.parse(l) as Entry);
+  const entries: Entry[] = [];
+  const handle = HANDLES[brand];
+  if (handle) {
+    const query = coreWords(product).join(" ");
+    try {
+      // Videos found inside the official channel are the brand's own, whatever the entry's channel field says.
+      const own = parse(await ytdlp(["--flat-playlist", "--dump-json", "--playlist-end", "20", `https://www.youtube.com/${handle}/search?query=${encodeURIComponent(query)}`]));
+      entries.push(...own.map((e) => ({ ...e, channel: e.channel ?? names[0], uploader: e.uploader ?? names[0] })));
+    } catch (e) {
+      console.log(`  (channel search: ${(e as Error).message.split("\n").find((l) => /error/i.test(l)) ?? "failed"})`);
+    }
+  }
+  entries.push(...parse(await ytdlp(["--flat-playlist", "--dump-json", `ytsearch20:${product}`])));
   if (process.env.YT_DEBUG) for (const e of entries.slice(0, 12)) console.log(`    [yt] ${e.channel ?? "?"} / ${e.uploader ?? "?"} / ${e.channel_is_verified} / ${e.duration} / ${e.title}`);
   return entries
     .filter((e) => {
@@ -55,6 +73,7 @@ export async function officialYouTubeVideos(product: string): Promise<{ id: stri
       const title = e.title ?? "";
       return names.includes(channel) && e.channel_is_verified !== false && mentions(title, product) && !otherModel(title, product) && (e.duration ?? 0) >= 15 && (e.duration ?? 0) <= 1200;
     })
+    .filter((e, i, all) => all.findIndex((x) => x.id === e.id) === i)
     // Announcement/ad-length videos are mostly product shots; long keynotes are mostly people on stage.
     .sort((a, b) => Math.abs((a.duration ?? 0) - 120) - Math.abs((b.duration ?? 0) - 120))
     .map((e) => ({ id: e.id, title: e.title ?? "", duration: e.duration ?? 0, channel: e.channel ?? e.uploader ?? brand }));
