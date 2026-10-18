@@ -112,7 +112,11 @@ export async function youtubeClip(product: string, dir: string, nth: number): Pr
   const file = path.join(dir, `yt-${video.id}-${at}.mp4`);
   if (!fs.existsSync(file)) {
     const raw = `${file}.src.mp4`;
-    if (process.env.YT_DEBUG) console.log((await ytdlp(["-F", `https://www.youtube.com/watch?v=${video.id}`]).catch((e) => String(e))).split("\n").filter((l) => /video only|mp4|webm/.test(l)).slice(-12).join("\n"));
+    if (process.env.YT_DEBUG) {
+      const out = await run("bash", ["-c", `yt-dlp --js-runtimes node ${cookies().join(" ")} -F "https://www.youtube.com/watch?v=${video.id}" 2>&1 || true`]);
+      console.log(out.split("\n").filter((l) => /WARNING|ERROR|video only|^\d+\s+mp4/.test(l)).slice(-25).join("\n"));
+      console.log(await run("bash", ["-c", "which yt-dlp; yt-dlp --version; node --version; tail -5 /tmp/pot.log 2>/dev/null || true"]));
+    }
     // Best video up to 1080p (sorted by resolution, so a 360p file isn't picked when 1080p exists).
     await ytdlp(["-f", "bv*", "-S", "res:1080,vcodec:avc1", "--download-sections", `*${at}-${at + 6}`, "--force-keyframes-at-cuts", "-o", raw, `https://www.youtube.com/watch?v=${video.id}`]);
     const got = fs.readdirSync(dir).find((f) => f.startsWith(path.basename(raw).replace(/\.mp4$/, "")));
