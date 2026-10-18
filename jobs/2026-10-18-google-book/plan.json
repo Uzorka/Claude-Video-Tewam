@@ -1,0 +1,324 @@
+{
+  "title": "How Google Scanned 10 Million Books and Settled for $125M",
+  "alt_titles": [
+    "The $125 Million Lawsuit That Created Google Books",
+    "Why Google Paid $125M to Control Out-of-Print Books",
+    "Google Books: The Monopoly That Settled Copyright History"
+  ],
+  "thumbnail_text": "10M BOOKS SCANNED",
+  "description": "Google scanned over ten million books to build the ultimate digital library, triggering massive lawsuits from authors and publishers. Here is how a landmark $125 million settlement changed digital reading forever.\n\nSources:\n- https://www.pcworld.com/article/531819/article-6943.html\n- https://www.computerworld.com/article/1643361/google-offers-free-book-downloads.html\n- https://goodereader.com/blog/e-book-news/google-introduces-new-book-management-feature-to-its-play-books-app\n- https://landing.google.com/sre/books/",
+  "tags": [
+    "Google",
+    "Google Books",
+    "Google Play Books",
+    "Tech History",
+    "Copyright Law",
+    "Publishing",
+    "Ebooks"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Google scanned over 10 million books into its servers, triggering one of the biggest copyright battles in internet history. By the end of this video, you'll know whether this massive experiment built a public digital library or just solidified an untouchable corporate monopoly.",
+      "kind": "title",
+      "broll_query": "library bookshelf stacks",
+      "heading": "Google Books",
+      "subheading": "The $125M Digital Library",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "origins",
+      "narration": "Long before Android or Chrome, indexing every book on Earth was a personal dream for Google founders Larry Page and Sergey Brin. In 2004, they launched Google Print, partnering with major universities like Harvard, Stanford, and Oxford to digitize millions of physical texts.",
+      "kind": "timeline",
+      "broll_query": "university campus library",
+      "heading": "The Digitization Timeline",
+      "subheading": "From Google Print to Millions of Books",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": [
+        {
+          "date": "2004",
+          "label": "Google Print Launches"
+        },
+        {
+          "date": "Partners",
+          "label": "Harvard, Stanford & Oxford"
+        },
+        {
+          "date": "10M+ Books",
+          "label": "Scanned From Partner Collections"
+        }
+      ],
+      "product": "Google Books"
+    },
+    {
+      "id": "scanning_scale",
+      "narration": "Out of the first 10 million works digitized, Google processed 1.5 million public-domain books and another 1.5 million directly from publisher and author partners. But millions more were scanned without asking first.",
+      "kind": "stat",
+      "broll_query": "scanning book pages scanner",
+      "heading": "Books Digitized",
+      "subheading": "Including 1.5M public domain books",
+      "stat_value": "10M+",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "fair_use_argument",
+      "narration": "Here is how Google defended it: they argued that scanning entire copyright-protected books just to display short text snippets in search results was protected by legal fair use.",
+      "kind": "process",
+      "broll_query": "courtroom gavel justice",
+      "heading": "The Snippet Strategy",
+      "subheading": "How Google justified unauthorized scanning",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "📖",
+          "label": "Scan Physical Books"
+        },
+        {
+          "icon": "🔍",
+          "label": "Index Full Text"
+        },
+        {
+          "icon": "📝",
+          "label": "Show Snippets Only"
+        },
+        {
+          "icon": "⚖️",
+          "label": "Claim Fair Use"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "settlement_details",
+      "narration": "Authors and publishers were not convinced. The Authors Guild filed a class-action lawsuit, resulting in Google agreeing to a landmark $125 million settlement rather than fighting for a binding judicial precedent.",
+      "kind": "screenshot",
+      "broll_query": "corporate lawyer signing document",
+      "heading": "Class Action Settlement",
+      "subheading": "$125 million agreement reached",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://www.pcworld.com/article/531819/article-6943.html",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "cost_breakdown",
+      "narration": "That settlement money wasn't just a fine. $34 million went toward creating an independent Book Rights Registry, while $45 million was reserved directly for copyright holders whose works were scanned without initial permission.",
+      "kind": "list",
+      "broll_query": "money finance chart growth",
+      "heading": "Settlement Payouts",
+      "subheading": "Where the $125 million went",
+      "stat_value": null,
+      "items": [
+        "$34M to Book Rights Registry",
+        "$45M direct payouts to rights holders",
+        "$100M+ total scanning & legal costs"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "revenue_split_compare",
+      "narration": "To monetize out-of-print books, Google introduced a model retaining 37% of revenue and paying 63% back to rights holders. Compare that to Amazon Kindle, which pays independent authors a 35% base royalty rate while requiring price parity across stores.",
+      "kind": "compare",
+      "broll_query": "tablet e-reader reading screen",
+      "heading": "Digital Royalty Comparison",
+      "subheading": "Google vs Amazon business models",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "Google Editions",
+        "points": [
+          "37% retained by Google",
+          "63% paid to rights holders"
+        ],
+        "product": "Google Books"
+      },
+      "right": {
+        "label": "Amazon Kindle",
+        "points": [
+          "35% base royalty rate",
+          "Requires price consistency"
+        ],
+        "product": "Amazon Kindle"
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "monopoly_criticism",
+      "narration": "Legal scholars actually criticized Google for settling. By paying $125 million to clear its path, Google locked up the out-of-print book index, creating financial barriers that smaller tech companies and open-source projects simply couldn't afford.",
+      "kind": "broll",
+      "broll_query": "judge gavel courtroom",
+      "heading": null,
+      "subheading": null,
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "free_downloads",
+      "narration": "So, what can you actually do with Google Books today? For starters, public-domain books not under copyright protection can be downloaded for free as complete PDF files for offline reading or printing.",
+      "kind": "screenshot",
+      "broll_query": "person downloading pdf file",
+      "heading": "Free PDF Downloads",
+      "subheading": "Available for public domain titles",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://www.computerworld.com/article/1643361/google-offers-free-book-downloads.html",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "local_library",
+      "narration": "Plus, if you're looking for physical print copies, Google Search integrates directly with local library networks, letting you instantly check if a nearby physical branch or e-book catalog has the title in stock.",
+      "kind": "product",
+      "broll_query": "public library bookshelf browsing",
+      "heading": "Local Library Search",
+      "subheading": "Find physical books near you",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Search"
+    },
+    {
+      "id": "play_books_app",
+      "narration": "If you read on your phone, Google Play Books updated its app with bulk management tools. Version 2023.04.17.00 added multi-select options for adding to shelves, detailed filters for reading age and genre, and an alphabetical side-index for large collections.",
+      "kind": "screenshot",
+      "broll_query": "person holding smartphone scrolling app",
+      "heading": "Play Books App Features",
+      "subheading": "Bulk actions, filtering, side-index",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://goodereader.com/blog/e-book-news/google-introduces-new-book-management-feature-to-its-play-books-app",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Play Books"
+    },
+    {
+      "id": "sre_books",
+      "narration": "Google even acts as its own publisher. Their engineering division publishes open Site Reliability Engineering books online, detailing real-world practices on system reliability, security, case studies, and AI integrations.",
+      "kind": "specs",
+      "broll_query": "software engineering code screen",
+      "heading": "Google SRE Book Series",
+      "subheading": "Technical publications by Google engineers",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": [
+        {
+          "label": "Publisher",
+          "value": "Google SRE Team"
+        },
+        {
+          "label": "Key Topics",
+          "value": "Reliability & Security"
+        },
+        {
+          "label": "Case Studies",
+          "value": "Scalable Infrastructure"
+        },
+        {
+          "label": "Integrations",
+          "value": "AI Systems & Workflows"
+        }
+      ],
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "library_quote",
+      "narration": "While library groups commended the project for offering unprecedented public access to millions of texts, they also warned that concentrating this power in one company could eventually lead to skyrocketing subscription prices.",
+      "kind": "quote",
+      "broll_query": "books open pages library",
+      "heading": "Unprecedented public access to a digital library containing millions of books.",
+      "subheading": "Library Associations Statement",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    },
+    {
+      "id": "verdict",
+      "narration": "Google's book project gave humanity unmatched search access to written knowledge, but settling its lawsuit for $125 million ultimately secured its own monopoly over the fair use precedent open-source projects needed. Hit subscribe for more deep dives into tech's biggest decisions.",
+      "kind": "title",
+      "broll_query": "futuristic digital library data",
+      "heading": "Pragmatic Business, Lost Precedent",
+      "subheading": "The legacy of Google Books",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Books"
+    }
+  ]
+}
