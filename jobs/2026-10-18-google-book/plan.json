@@ -253,6 +253,27 @@
       "product": "Google Play Books"
     },
     {
+      "id": "os_and_devices",
+      "narration": "Across mobile operating systems and reading devices, Google positioned its reading ecosystem to run across platforms, contrasting with locked hardware environments like Apple's tablet ecosystem or dedicated Kindle e-readers.",
+      "kind": "list",
+      "broll_query": "tablet device mobile reading",
+      "heading": "OS & Device Ecosystem",
+      "subheading": "Cross-platform access vs closed hardware",
+      "stat_value": null,
+      "items": [
+        "Cross-platform mobile OS support",
+        "Open web browser access",
+        "Competes with Apple tablet ecosystem"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Google Play Books"
+    },
+    {
       "id": "sre_books",
       "narration": "Google even acts as its own publisher. Their engineering division publishes open Site Reliability Engineering books online, detailing real-world practices on system reliability, security, case studies, and AI integrations.",
       "kind": "specs",

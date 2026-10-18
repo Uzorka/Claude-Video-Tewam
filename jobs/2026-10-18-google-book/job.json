@@ -1,7 +1,7 @@
 {
   "id": "2026-10-18-google-book",
   "createdAt": "2026-10-18T21:13:03.675Z",
-  "updatedAt": "2026-10-18T21:35:29.555Z",
+  "updatedAt": "2026-10-18T23:35:36.020Z",
   "status": "in_review",
   "topic": {
     "title": "google book",
@@ -10,14 +10,21 @@
     "score": 100,
     "source_urls": []
   },
-  "version": 1,
-  "feedback": [],
+  "version": 2,
+  "feedback": [
+    {
+      "at": "2026-10-18T23:17:21.062Z",
+      "text": "/new. Google book Os. And device"
+    }
+  ],
   "reviewMessageIds": [
     173,
-    174
+    174,
+    178,
+    179
   ],
-  "releaseTag": "video-2026-10-18-google-book-v1",
-  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-18-google-book-v1/2026-10-18-google-book-v1.mp4",
+  "releaseTag": "video-2026-10-18-google-book-v2",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-18-google-book-v2/2026-10-18-google-book-v2.mp4",
   "youtubeId": null,
   "error": null
 }
