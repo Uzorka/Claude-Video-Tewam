@@ -1,7 +1,7 @@
 {
   "id": "2026-10-18-iphone-duo",
   "createdAt": "2026-10-18T16:37:13.018Z",
-  "updatedAt": "2026-10-18T16:50:03.363Z",
+  "updatedAt": "2026-10-18T19:03:33.363Z",
   "status": "in_review",
   "topic": {
     "title": "iPhone Duo",
@@ -10,14 +10,21 @@
     "score": 100,
     "source_urls": []
   },
-  "version": 1,
-  "feedback": [],
+  "version": 2,
+  "feedback": [
+    {
+      "at": "2026-10-18T18:54:29.244Z",
+      "text": "/new.  iPhone Duo"
+    }
+  ],
   "reviewMessageIds": [
     134,
-    135
+    135,
+    168,
+    169
   ],
-  "releaseTag": "video-2026-10-18-iphone-duo-v1",
-  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-18-iphone-duo-v1/2026-10-18-iphone-duo-v1.mp4",
+  "releaseTag": "video-2026-10-18-iphone-duo-v2",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-18-iphone-duo-v2/2026-10-18-iphone-duo-v2.mp4",
   "youtubeId": null,
   "error": null
 }
