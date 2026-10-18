@@ -400,7 +400,7 @@ export async function downloadVideo(v: FoundImage, dir: string): Promise<{ file:
  * Every scene that names a product gets its photo, so viewers can tie the name to the thing.
  */
 export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleImages: FoundImage[]) {
-  const videos: Record<string, { file: string; duration: number }> = {};
+  const videos: Record<string, { file: string; duration: number; lowRes?: boolean }> = {};
   const photos: Record<string, { file: string; credit: string | null }> = {};
   const sidePhotos: Record<string, { left: string | null; right: string | null }> = {};
   const credits = new Set<string>();
@@ -512,7 +512,7 @@ export async function fetchRealVisuals(jobId: string, scenes: Scene[], articleIm
         try {
           const clip = await youtubeClip(scene.product, dir, nth);
           if (clip) {
-            videos[scene.id] = { file: publicPath(clip.file), duration: clip.duration };
+            videos[scene.id] = { file: publicPath(clip.file), duration: clip.duration, lowRes: clip.lowRes };
             credits.add(`Footage: ${clip.credit}, "${clip.title}": ${clip.source}`);
           }
         } catch (e) {

@@ -61,7 +61,10 @@ function cookies() {
   return ["--cookies", cookieFile];
 }
 
-const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...cookies(), ...args]);
+// In the cloud, HD formats need a PO token from the bgutil helper the workflow starts (otherwise YouTube offers 360p only).
+// mweb + the PO token is the combination yt-dlp recommends when an account gets YouTube's "SABR-only" streaming (360p only otherwise).
+const ytdlp = (args: string[]) =>
+  run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", "--extractor-args", "youtube:player_client=mweb,default", ...cookies(), ...args]);
 
 /** The maker's own videos about this exact product, short ones (announcements, ads, hands-on) first. */
 export async function officialYouTubeVideos(product: string): Promise<{ id: string; title: string; duration: number; channel: string }[]> {
@@ -99,7 +102,7 @@ export async function officialYouTubeVideos(product: string): Promise<{ id: stri
  * Download one 6-second muted section of an official video (only that section is fetched).
  * `nth` picks a different moment for each scene so the same shot isn't repeated.
  */
-export async function youtubeClip(product: string, dir: string, nth: number): Promise<(FoundImage & { file: string; duration: number }) | null> {
+export async function youtubeClip(product: string, dir: string, nth: number): Promise<(FoundImage & { file: string; duration: number; lowRes: boolean }) | null> {
   const videos = await officialYouTubeVideos(product);
   if (!videos.length) {
     console.log(`  · no official YouTube video found for "${product}"`);
@@ -111,11 +114,18 @@ export async function youtubeClip(product: string, dir: string, nth: number): Pr
   const file = path.join(dir, `yt-${video.id}-${at}.mp4`);
   if (!fs.existsSync(file)) {
     const raw = `${file}.src.mp4`;
-    await ytdlp(["-f", "bv*[height<=1080][ext=mp4]/bv*[height<=1080]/bv*", "--download-sections", `*${at}-${at + 6}`, "--force-keyframes-at-cuts", "-o", raw, `https://www.youtube.com/watch?v=${video.id}`]);
+    if (process.env.YT_DEBUG) {
+      const out = await run("bash", ["-c", `yt-dlp --js-runtimes node ${cookies().join(" ")} -F "https://www.youtube.com/watch?v=${video.id}" 2>&1 || true`]);
+      console.log(out.split("\n").filter((l) => /WARNING|ERROR|video only|^\d+\s+mp4/.test(l)).slice(-25).join("\n"));
+      console.log(await run("bash", ["-c", "which yt-dlp; yt-dlp --version; node --version; tail -5 /tmp/pot.log 2>/dev/null || true"]));
+    }
+    // Best video up to 1080p (sorted by resolution, so a 360p file isn't picked when 1080p exists).
+    await ytdlp(["-f", "bv*", "-S", "res:1080,vcodec:avc1", "--download-sections", `*${at}-${at + 6}`, "--force-keyframes-at-cuts", "-o", raw, `https://www.youtube.com/watch?v=${video.id}`]);
     const got = fs.readdirSync(dir).find((f) => f.startsWith(path.basename(raw).replace(/\.mp4$/, "")));
     if (!got) throw new Error("download produced no file");
     await run("ffmpeg", ["-y", "-v", "error", "-i", path.join(dir, got), "-an", "-t", "6", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", file]);
     fs.rmSync(path.join(dir, got), { force: true });
   }
-  return { url: `https://youtu.be/${video.id}`, source: `https://youtu.be/${video.id}?t=${at}`, credit: `${video.channel} (YouTube)`, title: video.title, file, duration: 6 };
+  const height = Number((await run("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "csv=p=0", file])).trim());
+  return { lowRes: height < 700, url: `https://youtu.be/${video.id}`, source: `https://youtu.be/${video.id}?t=${at}`, credit: `${video.channel} (YouTube)`, title: video.title, file, duration: 6 };
 }

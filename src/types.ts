@@ -89,6 +89,8 @@ export type RenderScene = Scene & {
   words: WordTiming[]; // relative to scene start
   broll: string | null; // video path relative to public/
   brollDuration: number | null; // seconds of footage available
+  /** Footage below HD (e.g. a 360p YouTube clip): shown as a framed card instead of stretched full screen. */
+  brollLowRes?: boolean;
   image: string | null; // screenshot path relative to public/
   /** Where the matching passage sits in the screenshot (fractions 0-1), to zoom in and highlight it. */
   imageFocus: { x: number; y: number; w: number; h: number; aspect: number } | null;
