@@ -61,9 +61,8 @@ function cookies() {
   return ["--cookies", cookieFile];
 }
 
-// The TV and Safari clients get HD formats from cloud servers; the default web client often only offers 360p there.
-const ytdlp = (args: string[]) =>
-  run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", "--extractor-args", "youtube:player_client=tv,web_safari,default", ...cookies(), ...args]);
+// In the cloud, HD formats need a PO token from the bgutil helper the workflow starts (otherwise YouTube offers 360p only).
+const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...cookies(), ...args]);
 
 /** The maker's own videos about this exact product, short ones (announcements, ads, hands-on) first. */
 export async function officialYouTubeVideos(product: string): Promise<{ id: string; title: string; duration: number; channel: string }[]> {

@@ -108,8 +108,21 @@ jobs:
           sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg fonts-noto-color-emoji > /dev/null
           npx playwright-core install --with-deps chromium > /dev/null
           npx remotion browser ensure
-          # yt-dlp: only used when YouTube clips are switched on (/ytclips on)
-          sudo curl -fsSL -o /usr/local/bin/yt-dlp https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp && sudo chmod +x /usr/local/bin/yt-dlp || echo "(yt-dlp not installed)"
+
+      - name: Install YouTube clip tools
+        # Only when YouTube clips are on (/ytclips on) or for the "photos" preview.
+        if: steps.gate.outputs.skip != 'true' && env.ACTION != 'check' && env.ACTION != 'topics'
+        continue-on-error: true
+        run: |
+          if [ "$ACTION" != "photos" ] && [ "$YOUTUBE_CLIPS" != "on" ] && ! grep -q '"ytClips": true' state/settings.json 2>/dev/null; then exit 0; fi
+          # yt-dlp + a PO-token helper: without the token YouTube only gives cloud servers 360p video.
+          python3 -m pip install -q --user --break-system-packages -U "yt-dlp[default]" bgutil-ytdlp-pot-provider
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          V=$(python3 -m pip show bgutil-ytdlp-pot-provider | awk '/^Version/{print $2}')
+          git clone -q --depth 1 --branch "$V" https://github.com/Brainicism/bgutil-ytdlp-pot-provider /tmp/pot
+          cd /tmp/pot/server && npm ci --silent --no-audit --no-fund && npx tsc
+          nohup node build/main.js > /tmp/pot.log 2>&1 &
+          sleep 3 && echo "YouTube helper $V running"
 
       - name: Run "${{ env.ACTION }}"
         if: steps.gate.outputs.skip != 'true'
