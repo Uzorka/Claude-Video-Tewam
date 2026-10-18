@@ -1,7 +1,7 @@
 {
   "id": "2026-10-17-apple-inc",
   "createdAt": "2026-10-17T20:47:26.634Z",
-  "updatedAt": "2026-10-17T21:17:10.194Z",
+  "updatedAt": "2026-10-18T13:46:55.765Z",
   "status": "in_review",
   "topic": {
     "title": "Apple Inc",
@@ -10,14 +10,21 @@
     "score": 100,
     "source_urls": []
   },
-  "version": 1,
-  "feedback": [],
+  "version": 2,
+  "feedback": [
+    {
+      "at": "2026-10-18T13:20:58.795Z",
+      "text": "/new. iPhone Duo"
+    }
+  ],
   "reviewMessageIds": [
     91,
-    92
+    92,
+    129,
+    130
   ],
-  "releaseTag": "video-2026-10-17-apple-inc-v1",
-  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-17-apple-inc-v1/2026-10-17-apple-inc-v1.mp4",
+  "releaseTag": "video-2026-10-17-apple-inc-v2",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-10-17-apple-inc-v2/2026-10-17-apple-inc-v2.mp4",
   "youtubeId": null,
   "error": null
 }

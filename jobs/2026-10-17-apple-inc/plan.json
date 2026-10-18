@@ -15,7 +15,8 @@
     "Smart Home",
     "LG",
     "Tech News",
-    "Apple Intelligence"
+    "Apple Intelligence",
+    "iPhone"
   ],
   "scenes": [
     {
@@ -146,6 +147,23 @@
         "Excluded from launch in Europe",
         "Excluded from launch in China"
       ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "iphone_duo",
+      "narration": "If you're waiting for rumored hardware like an iPhone Duo, don't hold your breath. Apple hasn't announced any dual-screen device, relying instead on its existing lineup—where iPhone revenue already jumped 22 percent—to push people onto new silicon.",
+      "kind": "stat",
+      "broll_query": "person holding smartphone scrolling",
+      "heading": "Quarterly iPhone Revenue",
+      "subheading": "No unannounced hardware needed",
+      "stat_value": "+22%",
+      "items": null,
       "left": null,
       "right": null,
       "url": null,
