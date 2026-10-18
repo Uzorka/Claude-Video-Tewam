@@ -2,5 +2,6 @@
   "voiceId": "nPczCjzI2devNBz1zQrb",
   "ownerChatId": "1914064878",
   "voiceEngine": "auto",
-  "kokoroVoice": "af_heart"
+  "kokoroVoice": "af_heart",
+  "ytClips": true
 }
