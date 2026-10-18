@@ -1,0 +1,332 @@
+{
+  "title": "Apple iPhone Duo: The $2,000 Reality Check",
+  "alt_titles": [
+    "iPhone Duo Impressions: Is Apple's Foldable Worth $2,000?",
+    "Why Apple Dropped Face ID on the iPhone Duo",
+    "iPhone Duo Sold Out Until 2027: Here's Why"
+  ],
+  "thumbnail_text": "DON'T PANIC BUY",
+  "description": "Apple just entered the foldable market with the iPhone Duo, starting at $1,999. In this breakdown, we examine its zero-crease engineering, the shocking absence of Face ID, repair costs, and whether you should wait.\n\nSources:\nhttps://www.apple.com/iphone-duo/\nhttps://www.apple.com/newsroom/2026/09/apple-unveils-iphone-duo/\nhttps://www.pcmag.com/news/wanna-pick-up-an-iphone-duo-on-launch-day-it-may-be-harder-than-you-think\nhttps://www.macrumors.com/2026/10/16/iphone-duo-preorder-shipping-wait-times/\nhttps://mashable.com/tech/iphone-duo-preorder-guide-price-release-date-specs-deals",
+  "tags": [
+    "iPhone Duo",
+    "Apple foldable",
+    "iPhone Duo review",
+    "iPhone 18 Pro Max",
+    "foldable phone",
+    "Apple A20 Pro",
+    "tech review",
+    "Uzorka Tech"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Apple's first foldable phone opened for preorders this morning, and within thirty minutes, every single model was backordered into late January. By the end of this video, you'll know whether the new iPhone Duo is genuinely worth that wait, or if you're better off skipping generation one.",
+      "kind": "stat",
+      "broll_query": "calendar flipping months",
+      "heading": "Backordered in 30 Minutes",
+      "subheading": "Apple Store shipping slips past Christmas",
+      "stat_value": "Jan 25",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "intro_product",
+      "narration": "This is the Apple iPhone Duo. It starts at $1,999 for 256 gigabytes of storage, and climbs all the way to $3,199 if you max it out with two terabytes. That makes it the most expensive iPhone Apple has ever built.",
+      "kind": "product",
+      "broll_query": null,
+      "heading": "The Most Expensive iPhone Ever",
+      "subheading": "Starting at $1,999 up to $3,199",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "timeline_rd",
+      "narration": "Apple didn't rush into this form factor overnight. In fact, John Ternus filed patents for folding displays back in 2011, spending fifteen years refining hinge mechanisms before putting this into your hands.",
+      "kind": "timeline",
+      "broll_query": "engineers working lab",
+      "heading": "Fifteen Years in Development",
+      "subheading": "Apple's long road to the foldable market",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": [
+        {
+          "date": "2011",
+          "label": "First folding patent filed"
+        },
+        {
+          "date": "Sep 2026",
+          "label": "iPhone Duo announced"
+        },
+        {
+          "date": "Oct 16, 2026",
+          "label": "Global preorders open"
+        },
+        {
+          "date": "Oct 23, 2026",
+          "label": "Retail launch date"
+        }
+      ],
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "specs_displays",
+      "narration": "On the outside, you get a 5.4-inch Super Retina XDR cover screen. Unfold the passport-style chassis, and you reveal a 7.6-inch tablet display that peaks at 3,000 nits outdoors.",
+      "kind": "specs",
+      "broll_query": null,
+      "heading": "Dual Super Retina XDR",
+      "subheading": "Passport book-fold architecture",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": [
+        {
+          "label": "Outer Screen",
+          "value": "5.4-inch OLED"
+        },
+        {
+          "label": "Inner Screen",
+          "value": "7.6-inch OLED"
+        },
+        {
+          "label": "Peak Brightness",
+          "value": "3,000 nits"
+        },
+        {
+          "label": "Refresh Rate",
+          "value": "ProMotion 120Hz"
+        }
+      ],
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "process_crease",
+      "narration": "The engineering feat everyone is talking about is the crease, or rather the lack of one. Apple stacks ten ultrathin layers with a stiff polymer cover, supported by under-display glass and custom gliding adhesives that absorb bending stress whenever you open it.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "How the Crease Disappears",
+      "subheading": "Multi-layer stress redistribution",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "📱",
+          "label": "Polymer top layer"
+        },
+        {
+          "icon": "✨",
+          "label": "Matte nano-texture finish"
+        },
+        {
+          "icon": "🔬",
+          "label": "Gliding stress adhesives"
+        },
+        {
+          "icon": "🛡️",
+          "label": "Under-display high-strength glass"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "press_quote",
+      "narration": "Early hands-on reviews praise the build quality. PCMag called it the best first-gen foldable they've used, noting that the matte nano-texture finish virtually hides the seam under ambient light.",
+      "kind": "quote",
+      "broll_query": "hands holding smartphone",
+      "heading": "The best first-gen foldable I've used.",
+      "subheading": "Eric Zeman, PCMag",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "compromise_list",
+      "narration": "But achieving this profile demanded significant trade-offs. You do not get Face ID here. Instead, Apple brought back Touch ID inside the side power button, which feels surprising on a flagship in 2026.",
+      "kind": "list",
+      "broll_query": null,
+      "heading": "First-Gen Compromises",
+      "subheading": "What Apple cut to make it thin",
+      "stat_value": null,
+      "items": [
+        "No Face ID sensor array",
+        "Side-button Touch ID or Apple Watch",
+        "Awkward top-mounted landscape volume buttons",
+        "Slippery mirror-polished titanium rails"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "repair_stat",
+      "narration": "And you really do not want to drop this device. If you damage the inner folding display without AppleCare Plus, an out-of-warranty screen replacement costs $999. That is half the price of the phone itself.",
+      "kind": "stat",
+      "broll_query": "money cash falling",
+      "heading": "Inner Screen Replacement",
+      "subheading": "Out-of-warranty Apple repair fee",
+      "stat_value": "$999",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "screenshot_source",
+      "narration": "Checking the official announcement, Apple points to a 3D-printed micro-blasted titanium hinge cover housing over one hundred components, paired with an IP68 dust and water resistance rating.",
+      "kind": "screenshot",
+      "broll_query": null,
+      "heading": "Precision Hinge Mechanics",
+      "subheading": "Over 100 components inside Grade 5 titanium",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://www.apple.com/newsroom/2026/09/apple-unveils-iphone-duo/",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "process_cameras",
+      "narration": "Software takes full advantage of the dual screens. With Duo Preview, your subject sees their live framing on the exterior display while you shoot with the main 48-megapixel camera, while Kid Cue shows playful animations to keep toddlers smiling.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "Dual Screen Camera Flow",
+      "subheading": "Simultaneous internal and external previews",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "📸",
+          "label": "48MP Dual Fusion capture"
+        },
+        {
+          "icon": "👀",
+          "label": "Subject checks exterior preview"
+        },
+        {
+          "icon": "👶",
+          "label": "Kid Cue animates cover screen"
+        },
+        {
+          "icon": "⚡",
+          "label": "Zero shutter lag processing"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "compare_buying",
+      "narration": "If you are trying to buy one on launch day, keep expectations in check. Apple Store walk-ins are virtually zero due to manufacturing yield bottlenecks, meaning carrier financing might be your only shot at getting a unit before the holidays.",
+      "kind": "compare",
+      "broll_query": null,
+      "heading": "Buying Paths Compared",
+      "subheading": "Delivery estimates vs trade-in values",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "Apple Direct Order",
+        "points": [
+          "Delivers January 25, 2027",
+          "Walk-in reservations sold out",
+          "Trade-ins up to $885"
+        ],
+        "product": "Apple iPhone Duo"
+      },
+      "right": {
+        "label": "Carrier Channels",
+        "points": [
+          "Shipping Nov to Dec 2026",
+          "Up to $1,200 bill credits",
+          "Effective base price $799"
+        ],
+        "product": null
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "verdict",
+      "narration": "Here is the honest verdict. The iPhone Duo proves Apple can engineer a folding hinge better than anyone else, but paying over two grand for gen-one sacrifices and a three-month backorder isn't practical. Let early adopters test the waters while you wait for round two.",
+      "kind": "title",
+      "broll_query": "person scrolling phone",
+      "heading": "Wait for Generation Two",
+      "subheading": "Brilliant engineering, steep first-gen compromises",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    },
+    {
+      "id": "outro",
+      "narration": "If you want honest breakdowns on the hardware that actually matters, hit subscribe and I will catch you in the next one.",
+      "kind": "product",
+      "broll_query": null,
+      "heading": "Uzorka Tech",
+      "subheading": "Subscribe for honest tech analysis",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Apple iPhone Duo"
+    }
+  ]
+}
