@@ -111,7 +111,9 @@ export async function youtubeClip(product: string, dir: string, nth: number): Pr
   const file = path.join(dir, `yt-${video.id}-${at}.mp4`);
   if (!fs.existsSync(file)) {
     const raw = `${file}.src.mp4`;
-    await ytdlp(["-f", "bv*[height<=1080][ext=mp4]/bv*[height<=1080]/bv*", "--download-sections", `*${at}-${at + 6}`, "--force-keyframes-at-cuts", "-o", raw, `https://www.youtube.com/watch?v=${video.id}`]);
+    if (process.env.YT_DEBUG) console.log((await ytdlp(["-F", `https://www.youtube.com/watch?v=${video.id}`]).catch((e) => String(e))).split("\n").filter((l) => /video only|mp4|webm/.test(l)).slice(-12).join("\n"));
+    // Best video up to 1080p (sorted by resolution, so a 360p file isn't picked when 1080p exists).
+    await ytdlp(["-f", "bv*", "-S", "res:1080,vcodec:avc1", "--download-sections", `*${at}-${at + 6}`, "--force-keyframes-at-cuts", "-o", raw, `https://www.youtube.com/watch?v=${video.id}`]);
     const got = fs.readdirSync(dir).find((f) => f.startsWith(path.basename(raw).replace(/\.mp4$/, "")));
     if (!got) throw new Error("download produced no file");
     await run("ffmpeg", ["-y", "-v", "error", "-i", path.join(dir, got), "-an", "-t", "6", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", file]);
