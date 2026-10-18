@@ -57,6 +57,7 @@ export async function produceAndReview(job: Job, plan: VideoPlan) {
       words: voice[s.id].words,
       broll: broll[s.id]?.file ?? null,
       brollDuration: broll[s.id]?.duration ?? null,
+      brollLowRes: "lowRes" in (broll[s.id] ?? {}) ? Boolean((broll[s.id] as { lowRes?: boolean }).lowRes) : false,
       image: shots[s.id]?.file ?? null,
       imageFocus: shots[s.id]?.focus ?? null,
       imageHost: shots[s.id]?.host ?? null,

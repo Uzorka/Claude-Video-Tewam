@@ -62,7 +62,9 @@ function cookies() {
 }
 
 // In the cloud, HD formats need a PO token from the bgutil helper the workflow starts (otherwise YouTube offers 360p only).
-const ytdlp = (args: string[]) => run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", ...cookies(), ...args]);
+// mweb + the PO token is the combination yt-dlp recommends when an account gets YouTube's "SABR-only" streaming (360p only otherwise).
+const ytdlp = (args: string[]) =>
+  run("yt-dlp", ["--no-warnings", "--js-runtimes", "node", "--extractor-args", "youtube:player_client=mweb,default", ...cookies(), ...args]);
 
 /** The maker's own videos about this exact product, short ones (announcements, ads, hands-on) first. */
 export async function officialYouTubeVideos(product: string): Promise<{ id: string; title: string; duration: number; channel: string }[]> {
@@ -100,7 +102,7 @@ export async function officialYouTubeVideos(product: string): Promise<{ id: stri
  * Download one 6-second muted section of an official video (only that section is fetched).
  * `nth` picks a different moment for each scene so the same shot isn't repeated.
  */
-export async function youtubeClip(product: string, dir: string, nth: number): Promise<(FoundImage & { file: string; duration: number }) | null> {
+export async function youtubeClip(product: string, dir: string, nth: number): Promise<(FoundImage & { file: string; duration: number; lowRes: boolean }) | null> {
   const videos = await officialYouTubeVideos(product);
   if (!videos.length) {
     console.log(`  · no official YouTube video found for "${product}"`);
@@ -124,5 +126,6 @@ export async function youtubeClip(product: string, dir: string, nth: number): Pr
     await run("ffmpeg", ["-y", "-v", "error", "-i", path.join(dir, got), "-an", "-t", "6", "-vf", "scale='min(1920,iw)':-2", "-c:v", "libx264", "-preset", "veryfast", "-crf", "22", "-pix_fmt", "yuv420p", file]);
     fs.rmSync(path.join(dir, got), { force: true });
   }
-  return { url: `https://youtu.be/${video.id}`, source: `https://youtu.be/${video.id}?t=${at}`, credit: `${video.channel} (YouTube)`, title: video.title, file, duration: 6 };
+  const height = Number((await run("ffprobe", ["-v", "error", "-select_streams", "v:0", "-show_entries", "stream=height", "-of", "csv=p=0", file])).trim());
+  return { lowRes: height < 700, url: `https://youtu.be/${video.id}`, source: `https://youtu.be/${video.id}?t=${at}`, credit: `${video.channel} (YouTube)`, title: video.title, file, duration: 6 };
 }

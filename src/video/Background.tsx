@@ -41,6 +41,26 @@ export const Footage: React.FC<{ scene: RenderScene; durationInFrames: number; d
   const frame = useCurrentFrame();
   const scale = interpolate(frame, [0, durationInFrames], [1.04, 1.14]);
   const clipFrames = Math.max(FPS, Math.floor((scene.brollDuration ?? durationInFrames / FPS) * FPS) - 2);
+  const vertical = useVertical();
+  if (scene.brollLowRes) {
+    // Low-resolution clip: a framed card over a blurred copy of itself, so it never looks stretched and soft.
+    const rise = interpolate(frame, [0, 14], [40, 0], { extrapolateRight: "clamp", easing: (t) => 1 - Math.pow(1 - t, 3) });
+    const clip = (style: React.CSSProperties) => (
+      <Loop durationInFrames={clipFrames}>
+        <OffthreadVideo src={staticFile(scene.broll!)} muted style={style} />
+      </Loop>
+    );
+    return (
+      <AbsoluteFill style={{ overflow: "hidden", backgroundColor: theme.bg }}>
+        <AbsoluteFill style={{ transform: "scale(1.15)", filter: "blur(30px) brightness(0.4)" }}>{clip({ width: "100%", height: "100%", objectFit: "cover" })}</AbsoluteFill>
+        <AbsoluteFill style={{ justifyContent: "center", alignItems: "center", padding: vertical ? "400px 30px 700px" : "280px 330px 190px" }}>
+          <div style={{ ...(vertical ? { width: "100%" } : { height: "100%" }), aspectRatio: "16 / 9", borderRadius: 26, overflow: "hidden", boxShadow: "0 50px 140px rgba(0,0,0,0.7)", border: `1px solid ${theme.stroke}`, transform: `translateY(${rise}px) scale(${interpolate(frame, [0, durationInFrames], [1, 1.04])})` }}>
+            {clip({ width: "100%", height: "100%", objectFit: "cover" })}
+          </div>
+        </AbsoluteFill>
+      </AbsoluteFill>
+    );
+  }
   return (
     <AbsoluteFill style={{ overflow: "hidden", backgroundColor: theme.bg }}>
       <AbsoluteFill style={{ transform: `scale(${scale})`, filter: blur ? `blur(${blur}px)` : undefined }}>
