@@ -1,0 +1,366 @@
+{
+  "title": "Samsung Galaxy Z Fold 8 Review: The 201g Gamble",
+  "alt_titles": [
+    "Is Samsung's New 4:3 Foldable Worth $1,899?",
+    "Galaxy Z Fold 8: Lightest Fold Ever, But At What Cost?",
+    "Samsung Galaxy Z Fold 8 vs Z Fold 8 Ultra: Don't Buy the Wrong One"
+  ],
+  "thumbnail_text": "LIGHTEST FOLD EVER?",
+  "description": "Samsung unveiled the Galaxy Z Fold 8 with a brand-new 4:3 aspect ratio, weighing just 201g. We break down whether this lightweight tablet-style foldable is worth $1,899.99 or if you should hold out for the Ultra.\n\nSources:\n- Mashable: https://mashable.com/tech/samsung-galaxy-z-fold-8-launch-price-specifications\n- Samsung Global Newsroom: https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living\n- The Verge: https://www.theverge.com/2022/8/10/23300215/samsung-galaxy-z-fold-4-foldable-phone-killer-app",
+  "tags": [
+    "Samsung Galaxy Z Fold 8",
+    "Galaxy Z Fold 8",
+    "Samsung Foldable",
+    "Fold 8 vs Fold 8 Ultra",
+    "Tech Review",
+    "Uzorka Tech"
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "narration": "Samsung just completely changed the formula for its flagship foldable, making it shorter, wider, and lighter than ever before. But to hit a record-breaking 201 grams, they made a tradeoff that might split power users right down the middle.",
+      "kind": "title",
+      "broll_query": null,
+      "heading": "Samsung Galaxy Z Fold 8",
+      "subheading": "Wider, Lighter, Different",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "intro",
+      "narration": "This is the Samsung Galaxy Z Fold 8. By the end of this video, you will know whether this brand-new 4:3 aspect ratio is the future of foldables or if you should spend even more on the Ultra model.",
+      "kind": "product",
+      "broll_query": null,
+      "heading": "Galaxy Z Fold 8",
+      "subheading": "The 4:3 Redesign",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "weight",
+      "narration": "At just 201 grams, this is officially Samsung's lightest Galaxy Z Fold ever. It measures an absurdly thin 4.5 millimeters unfolded, making it genuinely feel like holding a sheet of glass.",
+      "kind": "stat",
+      "broll_query": null,
+      "heading": "World's Lightest Fold",
+      "subheading": "Samsung's thinnest fold yet",
+      "stat_value": "201g",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "history",
+      "narration": "To understand why this design shift happened, look back at how we got here. Early folds suffered from display fragility, the Z Fold 2 introduced UTG and outer cover screens, and now the Fold 8 completely shifts to a 4:3 aspect ratio.",
+      "kind": "timeline",
+      "broll_query": null,
+      "heading": "Evolution of the Fold",
+      "subheading": "From fragility to 4:3",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": [
+        {
+          "date": "2019",
+          "label": "Original Fold Launch"
+        },
+        {
+          "date": "2020",
+          "label": "Z Fold 2 UTG Glass"
+        },
+        {
+          "date": "2026",
+          "label": "Z Fold 8 4:3 Aspect Ratio"
+        }
+      ],
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "lineup_shift",
+      "narration": "Crucially, the Z Fold 8 is not a direct replacement for the Z Fold 7. Samsung split the lineup this year, targeting the standard Fold 8 at readers and everyday multitaskers while pushing heavy pro users toward the Z Fold 8 Ultra.",
+      "kind": "compare",
+      "broll_query": null,
+      "heading": "Lineup Split",
+      "subheading": "Standard vs Ultra",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "Galaxy Z Fold 8",
+        "points": [
+          "4:3 Aspect Ratio",
+          "201g Weight",
+          "Dual 50MP Cameras"
+        ],
+        "product": "Samsung Galaxy Z Fold 8"
+      },
+      "right": {
+        "label": "Galaxy Z Fold 8 Ultra",
+        "points": [
+          "8-inch Display",
+          "215g Weight",
+          "200MP Main Camera"
+        ],
+        "product": "Samsung Galaxy Z Fold 8 Ultra"
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "hinge_tech",
+      "narration": "How did they make the screen crease almost invisible? It starts with the Armor Flexhinge mechanism, layered over Flex Titanium structural support, which flattens the inner 7.6-inch AMOLED display completely under light.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "Crease Elimination",
+      "subheading": "Flex Titanium technology",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "⚙️",
+          "label": "Armor Flexhinge"
+        },
+        {
+          "icon": "🛡️",
+          "label": "Flex Titanium Layer"
+        },
+        {
+          "icon": "📱",
+          "label": "7.6-inch AMOLED Display"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "specs_overview",
+      "narration": "Under the hood, you get the Snapdragon 8 Elite Gen 5 processor, base 12GB RAM with options up to 16GB, and a 4,800mAh battery powering both the inner display and the 5.5-inch outer cover screen.",
+      "kind": "specs",
+      "broll_query": null,
+      "heading": "Key Specifications",
+      "subheading": "Flagship performance",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": [
+        {
+          "label": "Processor",
+          "value": "Snapdragon 8 Elite Gen 5"
+        },
+        {
+          "label": "RAM / Storage",
+          "value": "12GB Base (Up to 16GB / 1TB)"
+        },
+        {
+          "label": "Battery",
+          "value": "4,800mAh"
+        },
+        {
+          "label": "Cover Screen",
+          "value": "5.5-inch 120Hz AMOLED"
+        }
+      ],
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "software_ai",
+      "narration": "Samsung's official announcement highlights how deep the software integration goes, combining partner tools like Gemini Intelligence with features like My Fancam for AI subject tracking.",
+      "kind": "screenshot",
+      "broll_query": null,
+      "heading": "Galaxy AI & Gemini",
+      "subheading": "Integrated intelligence",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": "https://news.samsung.com/global/samsung-galaxy-z-fold8-ultra-fold8-and-flip8foldables-perfected-for-every-way-of-living",
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "camera_tradeoff",
+      "narration": "Where the compromises hit hardest is the camera setup. You get a 50MP wide, 50MP ultrawide, and a 10MP selfie shooter, but there is no dedicated telephoto lens at all.",
+      "kind": "list",
+      "broll_query": null,
+      "heading": "Camera Setup",
+      "subheading": "Missing telephoto lens",
+      "stat_value": null,
+      "items": [
+        "50MP Wide Sensor",
+        "50MP Ultrawide Sensor",
+        "10MP Selfie Camera",
+        "No Telephoto Lens"
+      ],
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "camera_broll",
+      "narration": "For social media and quick clips with 8K recording at 30fps, it performs well. But compared to traditional Ultra bar phones, you are missing out on maximum zoom capabilities.",
+      "kind": "broll",
+      "broll_query": "person holding smartphone record video",
+      "heading": null,
+      "subheading": null,
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "fancam_feature",
+      "narration": "When you record video using the new My Fancam feature, the system tracks your subject, applies AI cropping, and automatically formats the output for vertical video feeds.",
+      "kind": "process",
+      "broll_query": null,
+      "heading": "My Fancam AI",
+      "subheading": "Auto tracking and cropping",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": [
+        {
+          "icon": "🎯",
+          "label": "Subject Tracking"
+        },
+        {
+          "icon": "✂️",
+          "label": "AI Video Cropping"
+        },
+        {
+          "icon": "📲",
+          "label": "Vertical Format Output"
+        }
+      ],
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "pricing",
+      "narration": "Then there is the price tag. The Galaxy Z Fold 8 starts at $1,899.99 for 256GB of storage, though Amazon pre-orders launched with a discount down to $1,699.99.",
+      "kind": "stat",
+      "broll_query": null,
+      "heading": "Starting Price",
+      "subheading": "$1,699.99 pre-order on Amazon",
+      "stat_value": "$1,899.99",
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "apple_rivalry",
+      "narration": "This wider form factor also positions Samsung directly against Apple's expected shorter, wider iPhone foldable. If you want a pocketable tablet experience, this 4:3 shape is clearly where the industry is heading.",
+      "kind": "compare",
+      "broll_query": null,
+      "heading": "Market Comparison",
+      "subheading": "Competing with expected iPhone fold",
+      "stat_value": null,
+      "items": null,
+      "left": {
+        "label": "Galaxy Z Fold 8",
+        "points": [
+          "4:3 Aspect Ratio",
+          "201g Ultra-light"
+        ],
+        "product": "Samsung Galaxy Z Fold 8"
+      },
+      "right": {
+        "label": "Expected iPhone Fold",
+        "points": [
+          "Shorter Wider Design",
+          "Expected September Launch"
+        ],
+        "product": null
+      },
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": null
+    },
+    {
+      "id": "verdict_quote",
+      "narration": "By splitting the Z Fold lineup into standard and Ultra tiers, Samsung gave everyday multitaskers the ultimate lightweight foldable, but forced serious camera enthusiasts to pay even more.",
+      "kind": "quote",
+      "broll_query": null,
+      "heading": "Samsung's decision to split the line gives multitaskers a lighter body, but power users must pay more for Ultra.",
+      "subheading": "Uzorka Tech Take",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    },
+    {
+      "id": "conclusion",
+      "narration": "The Galaxy Z Fold 8 is a triumph in hardware ergonomics, even if the camera cuts hurt. Hit subscribe for more honest tech breakdowns, and I will see you in the next one.",
+      "kind": "title",
+      "broll_query": null,
+      "heading": "Subscribe to Uzorka Tech",
+      "subheading": "More honest AI & tech reviews",
+      "stat_value": null,
+      "items": null,
+      "left": null,
+      "right": null,
+      "url": null,
+      "steps": null,
+      "specs": null,
+      "events": null,
+      "product": "Samsung Galaxy Z Fold 8"
+    }
+  ]
+}

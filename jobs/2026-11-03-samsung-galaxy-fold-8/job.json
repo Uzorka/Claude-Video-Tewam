@@ -1,0 +1,23 @@
+{
+  "id": "2026-11-03-samsung-galaxy-fold-8",
+  "createdAt": "2026-11-03T01:52:26.749Z",
+  "updatedAt": "2026-11-03T02:03:38.398Z",
+  "status": "in_review",
+  "topic": {
+    "title": "Samsung galaxy fold 8",
+    "angle": "As requested by the channel owner.",
+    "why_now": "Requested directly by the channel owner.",
+    "score": 100,
+    "source_urls": []
+  },
+  "version": 1,
+  "feedback": [],
+  "reviewMessageIds": [
+    183,
+    184
+  ],
+  "releaseTag": "video-2026-11-03-samsung-galaxy-fold-8-v1",
+  "fullVideoUrl": "https://github.com/Uzorka/Claude-Video-Tewam/releases/download/video-2026-11-03-samsung-galaxy-fold-8-v1/2026-11-03-samsung-galaxy-fold-8-v1.mp4",
+  "youtubeId": null,
+  "error": null
+}
